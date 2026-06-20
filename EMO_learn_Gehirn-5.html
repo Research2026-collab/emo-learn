@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMO.learn — Gehirn & Emotionen</title>
+<style>
+/* System sans-serif stack: Avenir on Apple, Segoe UI on Windows */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f7f4ef;--surface:#fff;--border:#ddd8cf;--text:#1a1714;--muted:#7a7268;--accent:#2d5f8a;
+  --pfc:#1e8449;--amy:#c0392b;--hpc:#2471a3;--acc:#7d3c98;--ins:#d68910;
+  --nac:#e67e22;--hyp:#922b21;--tha:#117a65;--ctx:#5d6d7e;--bst:#4a4a4a;
+}
+body{background:var(--bg);color:var(--text);font-family:'Avenir Next','Avenir','-apple-system','Segoe UI','Helvetica Neue',Arial,sans-serif;min-height:100vh;display:grid;grid-template-rows:auto 1fr}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:11px 22px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
+.logo{font-family:inherit;font-size:1.05rem;font-weight:600}
+.logo span{color:var(--muted);font-weight:300}
+.hctrls{margin-left:auto;display:flex;gap:8px;align-items:center}
+.tabbar,.langbar{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.tbtn,.lbtn{padding:5px 13px;font-size:.7rem;font-weight:500;font-family:inherit;background:transparent;border:none;cursor:pointer;color:var(--muted);letter-spacing:.05em;transition:background .15s,color .15s}
+.tbtn.on{background:var(--accent);color:#fff}
+.lbtn.on{background:#555;color:#fff}
+main{display:grid;grid-template-columns:1fr 420px;height:calc(100vh - 48px);overflow:hidden}
+.view{display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center;padding:18px 22px;overflow:hidden}
+.view.on{display:flex}
+#nv{overflow-y:auto;justify-content:flex-start;align-items:flex-start}
+.vlabel{font-size:.7rem;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:12px;align-self:flex-start}
+#bsvg{width:100%;max-width:600px}
+#bsvg svg{width:100%;height:auto;display:block}
+.br{cursor:pointer;transition:opacity .18s}
+.br:hover{opacity:.72}
+.br.hi{filter:drop-shadow(0 0 5px currentColor)}
+.br.dim{opacity:.13}
+.legend{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:12px;max-width:600px;align-self:flex-start}
+.li{display:flex;align-items:center;gap:5px;font-size:.67rem;color:var(--muted);cursor:pointer;padding:2px 0;transition:color .12s}
+.li:hover,.li.on{color:var(--text);font-weight:500}
+.ldot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+aside{border-left:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;overflow:hidden;min-height:0;max-height:100%}
+.cbar{height:4px;flex-shrink:0;transition:background .3s;background:var(--border)}
+.atop{padding:12px 20px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
+.atop h2{font-family:inherit;font-size:1.06rem;font-weight:600;line-height:1.3;margin-bottom:3px}
+.atop .lat{font-size:.7rem;color:var(--muted);font-style:italic}
+.sdesc{padding:13px 20px;font-size:.84rem;line-height:1.75;color:#2c2a27;border-bottom:1px solid var(--border);max-height:210px;overflow-y:auto;flex-shrink:0}
+.sdesc p{margin-bottom:7px}.sdesc p:last-child{margin-bottom:0}
+.lnote{background:#f0f7f4;border-left:3px solid #1e8449;margin:0 20px 12px;padding:10px 14px;font-size:.8rem;line-height:1.68;color:#1a3a2a;border-radius:0 5px 5px 0;flex-shrink:0}
+.lnote strong{font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:#1e8449;display:block;margin-bottom:4px;font-weight:600}
+.esec{padding:9px 20px 10px;flex-shrink:0;border-bottom:1px solid var(--border)}
+.eslbl{font-size:.61rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.etags{display:flex;flex-wrap:wrap;gap:5px}
+.etag{font-size:.69rem;padding:3px 10px;border-radius:12px;border:1px solid;cursor:pointer;transition:background .12s}
+.etag:hover{opacity:.75}
+.edet{padding:13px 20px;flex:1}
+.edh{font-family:inherit;font-size:.93rem;font-weight:700;margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.edot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.edet p{font-size:.84rem;line-height:1.75;color:#2c2a27;margin-bottom:8px}
+.elb{background:#f0f7f4;border-left:3px solid #1e8449;padding:10px 14px;border-radius:0 5px 5px 0;font-size:.8rem;line-height:1.68;color:#1a3a2a;margin-top:8px}
+.elb strong{font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:#1e8449;display:block;margin-bottom:4px;font-weight:600}
+.src{font-size:.72rem;color:var(--muted);font-style:italic;margin-top:10px;padding-top:9px;border-top:1px solid var(--border)}
+.empty{padding:24px 20px;color:var(--muted);font-size:.84rem;line-height:1.7;flex:1}
+#sc{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.empty strong{display:block;font-family:inherit;font-size:.96rem;font-weight:400;color:var(--text);margin-bottom:7px}
+.ni{width:100%;max-width:640px;margin:0 auto}
+.ntit{font-family:inherit;font-size:1.05rem;font-weight:600;margin-bottom:5px;margin-top:2px}
+.nsub{font-size:.82rem;color:var(--muted);margin-bottom:18px;line-height:1.6}
+.nc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:12px;cursor:pointer;transition:border-color .15s}
+.nc:hover{border-color:#aaa}
+.nc.ex{border-color:var(--accent)}
+.nch{display:flex;align-items:center;gap:10px}
+.nico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0}
+.ntt{font-family:inherit;font-size:.93rem;font-weight:700;line-height:1.25}
+.nts{font-size:.7rem;color:var(--muted);margin-top:1px}
+.nchev{margin-left:auto;color:var(--muted);font-size:.75rem;transition:transform .2s}
+.nc.ex .nchev{transform:rotate(180deg)}
+.ncb{display:none;margin-top:12px}
+.nc.ex .ncb{display:block}
+.nflow{display:flex;flex-direction:column;gap:0;margin-bottom:12px}
+.fstep{display:flex;align-items:flex-start;gap:10px}
+.fnum{width:21px;height:21px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:600;color:white;flex-shrink:0;margin-top:1px}
+.fcon{width:21px;display:flex;justify-content:center;flex-shrink:0}
+.fcon::before{content:'';width:1px;height:14px;background:var(--border);display:block;margin-top:3px}
+.ftxt{font-size:.82rem;line-height:1.65;color:var(--text);padding-bottom:7px}
+.ftxt strong{font-weight:600}
+.ftxt em{color:var(--muted);font-style:normal;font-size:.7rem}
+.nlb{background:#f0f7f4;border-left:3px solid var(--accent);padding:10px 14px;border-radius:0 6px 6px 0;font-size:.82rem;line-height:1.68;color:#1a3a2a}
+.nlb strong{display:block;font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:3px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">EMO<span>.learn</span> — <span data-i18n="header-title">Gehirn &amp; Emotionen</span></div>
+  <div class="hctrls">
+    <div class="tabbar">
+      <button class="tbtn on" id="tb1" onclick="setView('b')">&#x1F9E0; <span data-i18n="tab-structures">Strukturen</span></button>
+      <button class="tbtn" id="tb2" onclick="setView('n')">&#x1F517; <span data-i18n="tab-networks">Netzwerke</span></button>
+    </div>
+    <div class="langbar">
+      <button class="lbtn on" id="ld" onclick="setLang('de')">DE</button>
+      <button class="lbtn" id="le" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+</header>
+<main>
+  <div class="view on" id="bv">
+    <div class="vlabel" id="bh" data-i18n="click-hint">Klicke auf eine Hirnstruktur</div>
+    <div id="bsvg">
+      <svg viewBox="0 0 700 480" xmlns="http://www.w3.org/2000/svg">
+        <defs><style>text.L{font-family:'Nunito Sans',sans-serif;pointer-events:none}</style></defs>
+        <path data-id="cortex" class="br"
+          d="M130,240 C115,195 108,155 120,120 C132,85 158,60 195,48 C232,36 275,32 318,34 C365,36 408,46 442,66 C478,87 502,118 512,152 C522,186 518,220 510,250 C502,278 488,300 472,320 C456,340 438,356 418,368 C395,382 368,390 340,394 C310,398 278,396 252,388 C218,378 190,360 168,336 C148,314 135,278 130,240Z"
+          fill="#dce4ed" stroke="#a8b8c8" stroke-width="1.5"/>
+        <g stroke="#a8b8c8" stroke-width="1" fill="none" pointer-events="none" opacity="0.48">
+          <path d="M195,70 C210,58 240,52 270,56 C300,60 325,70 345,80"/>
+          <path d="M155,130 C162,115 174,104 190,98 C210,90 235,88 258,90"/>
+          <path d="M148,180 C152,164 160,150 172,142"/>
+          <path d="M440,90 C455,105 468,124 474,146"/>
+          <path d="M460,165 C472,182 480,202 482,224"/>
+          <path d="M270,385 C295,392 322,394 348,390 C372,386 394,378 412,366"/>
+          <path d="M170,310 C178,326 190,340 206,352"/>
+          <path d="M200,108 C218,100 240,96 265,96 C295,96 325,104 348,116"/>
+          <path d="M355,48 C382,56 406,72 424,92 C438,108 447,128 450,150"/>
+          <path d="M160,200 C165,186 174,174 186,164 C200,153 218,146 238,142"/>
+          <path d="M418,340 C435,330 450,316 462,300"/>
+          <path d="M140,250 C140,268 144,284 152,298"/>
+        </g>
+        <ellipse cx="450" cy="382" rx="70" ry="50" fill="#d5dce4" stroke="#9aaabb" stroke-width="1.2" pointer-events="none"/>
+        <g stroke="#9aaabb" stroke-width=".8" fill="none" pointer-events="none" opacity=".52">
+          <path d="M386,382 Q420,370 450,372 Q480,370 514,382"/>
+          <path d="M384,390 Q418,378 450,380 Q482,378 516,390"/>
+          <path d="M388,398 Q420,387 450,389 Q480,387 512,398"/>
+        </g>
+        <text x="450" y="403" text-anchor="middle" class="L" fill="#7a8a9a" font-size="9" font-style="italic">Cerebellum</text>
+        <path data-id="brainstem" class="br"
+          d="M390,358 C395,368 400,383 402,398 C404,413 403,426 400,436 C397,444 392,448 386,448 C380,448 374,444 370,436 C366,426 365,412 367,398 C369,384 374,370 380,361Z"
+          fill="#8a8a8a" stroke="#666" stroke-width="1"/>
+        <text x="386" y="462" text-anchor="middle" class="L" fill="#666" font-size="8.5" font-style="italic" data-i18n="brainstem">Hirnstamm</text>
+        <ellipse data-id="thalamus" class="br" cx="332" cy="255" rx="42" ry="30" fill="#117a65" opacity=".86" stroke="#0e5e4e" stroke-width="1"/>
+        <text x="332" y="259" text-anchor="middle" class="L" fill="white" font-size="9.5" font-weight="500">Thalamus</text>
+        <ellipse data-id="hypothalamus" class="br" cx="304" cy="293" rx="26" ry="17" fill="#922b21" opacity=".88" stroke="#7b241c" stroke-width="1"/>
+        <text x="304" y="297" text-anchor="middle" class="L" fill="white" font-size="8.5" font-weight="500">Hypothalamus</text>
+        <path data-id="hippocampus" class="br"
+          d="M198,302 C194,290 194,275 200,265 C208,253 222,249 238,251 C254,253 266,265 270,281 C274,297 268,315 256,325 C244,335 226,335 214,327 C204,319 198,312 198,302Z"
+          fill="#2471a3" opacity=".86" stroke="#1a5276" stroke-width="1"/>
+        <text x="234" y="294" text-anchor="middle" class="L" fill="white" font-size="8.5" font-weight="500">Hippocampus</text>
+        <ellipse data-id="amygdala" class="br" cx="209" cy="248" rx="25" ry="19" fill="#c0392b" opacity=".9" stroke="#922b21" stroke-width="1"/>
+        <text x="209" y="252" text-anchor="middle" class="L" fill="white" font-size="9" font-weight="500">Amygdala</text>
+        <ellipse data-id="nucleus" class="br" cx="274" cy="250" rx="20" ry="14" fill="#e67e22" opacity=".88" stroke="#b7770d" stroke-width="1"/>
+        <text x="274" y="254" text-anchor="middle" class="L" fill="white" font-size="7.5" font-weight="500">N.Acc.</text>
+        <path data-id="acc" class="br"
+          d="M247,194 C264,176 294,166 327,168 C359,170 384,182 397,200 C405,212 405,226 395,236 C383,248 363,252 341,248 C313,242 287,226 269,210 C257,200 249,194 247,194Z"
+          fill="#7d3c98" opacity=".75" stroke="#6c3483" stroke-width="1"/>
+        <text x="328" y="213" text-anchor="middle" class="L" fill="white" font-size="8.5" font-weight="500">Ant. Cingulum</text>
+        <path data-id="insula" class="br"
+          d="M419,166 C431,156 447,152 459,158 C473,165 479,180 475,196 C471,212 457,222 443,220 C427,218 415,206 413,192 C411,180 413,170 419,166Z"
+          fill="#d68910" opacity=".86" stroke="#b7770d" stroke-width="1"/>
+        <text x="445" y="190" text-anchor="middle" class="L" fill="white" font-size="8.5" font-weight="500">Insula</text>
+        <path data-id="pfc" class="br"
+          d="M131,237 C127,209 129,179 139,157 C151,131 169,111 193,99 C211,91 231,87 251,89 C273,91 291,101 303,117 C315,133 319,155 313,175 C307,195 291,211 269,221 C247,231 219,235 195,233 C169,231 145,239 131,237Z"
+          fill="#1e8449" opacity=".75" stroke="#1a7340" stroke-width="1"/>
+        <text x="216" y="167" text-anchor="middle" class="L" fill="white" font-size="9.5" font-weight="500" data-i18n="pfc-line1">Präfrontaler</text>
+        <text x="216" y="180" text-anchor="middle" class="L" fill="white" font-size="9.5" font-weight="500" data-i18n="pfc-line2">Kortex</text>
+        <text x="154" y="93" class="L" fill="#9aacbb" font-size="8.5" font-style="italic" text-anchor="middle" data-i18n="frontal">Frontallappen</text>
+        <text x="370" y="69" class="L" fill="#9aacbb" font-size="8.5" font-style="italic" text-anchor="middle" data-i18n="parietal">Parietallappen</text>
+        <text x="170" y="364" class="L" fill="#9aacbb" font-size="8.5" font-style="italic" text-anchor="middle" data-i18n="temporal">Temporallappen</text>
+        <text x="497" y="282" class="L" fill="#9aacbb" font-size="8" font-style="italic" text-anchor="middle" data-i18n="occipital-1">Okzipital-</text>
+        <text x="497" y="292" class="L" fill="#9aacbb" font-size="8" font-style="italic" text-anchor="middle" data-i18n="occipital-2">lappen</text>
+        <text x="30" y="462" class="L" fill="#ccc" font-size="7.5" data-i18n="schema-note">Schematische Medialansicht · linke Hemisphäre</text>
+      </svg>
+    </div>
+    <div class="legend" id="leg"></div>
+  </div>
+  <div class="view" id="nv"><div class="ni" id="ni"></div></div>
+  <aside id="sb">
+    <div class="cbar" id="cb"></div>
+    <div id="sc">
+      <div class="empty">
+        <strong id="et" data-i18n="select-structure">Gehirnstruktur auswählen</strong>
+        <span id="eb" data-i18n="select-hint">Klicke auf eine farbige Region oder auf einen Begriff in der Legende.</span>
+      </div>
+    </div>
+  </aside>
+</main>
+<script>
+var lang='de',view='b',selId=null,selEm=null;
+var C={pfc:'#1e8449',amygdala:'#c0392b',hippocampus:'#2471a3',acc:'#7d3c98',insula:'#d68910',nucleus:'#e67e22',thalamus:'#117a65',hypothalamus:'#922b21',cortex:'#5d6d7e',brainstem:'#4a4a4a'};
+
+var S={
+pfc:{de:{name:'Pr\u00e4frontaler Kortex',latin:'Cortex praefrontalis',
+desc:['Der pr\u00e4frontale Kortex liegt direkt hinter der Stirn \u2014 er ist der Teil des Gehirns, der am st\u00e4rksten mit bewusstem Denken, Planen und Entscheiden verbunden ist. Er reift beim Menschen erst um das 25. Lebensjahr vollst\u00e4ndig aus.',
+'Eine seiner wichtigsten Aufgaben: Er kann emotionale Reaktionen bremsen oder lenken. Wenn die Amygdala Alarm schl\u00e4gt, kann er eingreifen und fragen: \u201eIst das wirklich so schlimm? Was tue ich jetzt am besten?\u201c Dieser Vorgang hei\u00dft kognitive Neubewertung.'],
+learning:'Lernprozesse profitieren davon, wenn dieser Bereich aktiv einbezogen wird \u2014 durch Reflexionsaufgaben, bewusstes Innehalten vor einer Reaktion oder das Formulieren eigener Einsch\u00e4tzungen. Unter starkem Stress ist dieser Bereich schlechter erreichbar: Lernende reagieren dann eher aus dem Alarmmodus. Das erkl\u00e4rt, warum psychologische Sicherheit im Lernraum so wichtig ist.',
+emotions:{
+'\u00c4rger':{n:'Der pr\u00e4frontale Kortex kann \u00c4rgerimpulse bremsen, indem er die Situation neu bewertet: \u201eWas steckt wirklich hinter diesem Verhalten?\u201c Diese F\u00e4higkeit zur Neubewertung ist trainierbar.',l:'Lehrende k\u00f6nnen Teilnehmende darin unterst\u00fctzen, bei \u00c4rger innezuhalten und die eigene Interpretation zu hinterfragen \u2014 eine Kernkompetenz im Umgang mit Konflikten.'},
+'Angst':{n:'Der pr\u00e4frontale Kortex d\u00e4mpft Angstreaktionen durch seine Verbindungen zur Amygdala. Er erm\u00f6glicht die \u00dcberpr\u00fcfung: \u201eIst diese Bedrohung real?\u201c Bei \u00dcberlastung durch Stress gelingt das weniger gut.',l:'Pr\u00fcfungsangst oder Angst vor Blamage reduziert die Kapazit\u00e4t f\u00fcr differenziertes Denken \u2014 ein Argument f\u00fcr niedrigschwellige Lernformate und klar strukturierte Aufgaben.'},
+'Scham':{n:'Scham beinhaltet Selbstbewertung aus der Sicht anderer. Der pr\u00e4frontale Kortex ist dabei aktiv: Er integriert soziale Normen und das eigene Verhalten und bewertet beides. Zhu et al. (2025) identifizieren den temporoparietalen Übergangsbereich (TPJ) \u2014 in enger Verbindung mit pr\u00e4frontalen Arealen \u2014 als Schl\u00fcsselstruktur f\u00fcr Schamempfindlichkeit: Menschen, die hier weniger aktiv auf soziale Verantwortungsdiffusion reagieren, erleben st\u00e4rkere verantwortungsbasierte Scham.',l:'Lehrende k\u00f6nnen helfen, aus destruktiver Scham (\u201eIch bin falsch\u201c) konstruktive Reflexion zu machen: \u201eIch habe etwas falsch gemacht \u2014 was lerne ich daraus?\u201c Scham und Schuld sind neurobiologisch verschieden: Schuld richtet sich auf eine Handlung, Scham auf das Selbst. Diesen Unterschied zu kennen hilft, in Feedbacksituationen die richtige Sprache zu finden.'},
+'Stolz':{n:'Stolz auf eigene Leistungen aktiviert den mittleren Teil des pr\u00e4frontalen Kortex, der f\u00fcr Selbstwahrnehmung zust\u00e4ndig ist: \u201eWer bin ich, und was kann ich?\u201c',l:'Gezielte Anerkennung von Lernfortschritten st\u00e4rkt das Selbstbild und aktiviert Systeme, die weiteres Lernen motivieren.'},
+'Staunen':{n:'Beim Staunen werden automatische Denkmuster kurz au\u00dfer Kraft gesetzt. Der pr\u00e4frontale Kortex bleibt aktiv, um das Unerwartete einzuordnen \u2014 aber ohne feste Vorannahmen.',l:'Staunenserfahrungen \u00f6ffnen kognitive Fenster. Sie lassen sich p\u00e4dagogisch durch unerwartete Impulse, Widerspr\u00fcche oder Ph\u00e4nomene ausl\u00f6sen, die bestehende Annahmen in Frage stellen.'},
+'Neugier':{n:'Neugier erfordert die F\u00e4higkeit, eine Informationsl\u00fccke wahrzunehmen und als motivierend zu erleben. Der pr\u00e4frontale Kortex lenkt, wohin die Aufmerksamkeit geht.',l:'Lernumgebungen, die gezielt Wissensf\u00fcnken sichtbar machen \u2014 durch offene Fragen, Widerspr\u00fcche oder R\u00e4tsel \u2014 aktivieren neugierbasierte Lernmotivation.'}
+},source:'LeDoux (2015); Damasio (1994); Milad & Quirk (2012); Kandel et al. (2021)'},
+en:{name:'Prefrontal Cortex',latin:'Cortex praefrontalis',
+desc:['The prefrontal cortex sits directly behind the forehead \u2014 it is the part of the brain most closely associated with conscious thinking, planning, and decision-making. In humans, it does not fully mature until around age 25.',
+'One of its most important functions: it can put the brakes on emotional reactions. When the amygdala sounds the alarm, it can step in and ask: \u201cIs this really so bad? What should I do now?\u201d This process is called cognitive reappraisal.'],
+learning:'Learning benefits when this area is actively engaged \u2014 through reflection tasks, consciously pausing before reacting, or formulating one\'s own assessments. Under strong stress, this area becomes less accessible: learners then react more from alarm mode. This explains why psychological safety in the learning space matters so much.',
+emotions:{
+'Anger':{n:'The prefrontal cortex can brake anger impulses by reappraising the situation: \u201cWhat is really behind this behaviour?\u201d This capacity for reappraisal is trainable.',l:'Educators can support participants in pausing when angry and questioning their own interpretation \u2014 a core competence for handling conflict.'},
+'Fear':{n:'The prefrontal cortex dampens fear responses through its connections to the amygdala. It enables the check: \u201cIs this threat real?\u201d When overloaded by stress, this dampening is less effective.',l:'Exam anxiety or fear of embarrassment reduces capacity for differentiated thinking \u2014 an argument for low-threshold formats and clearly structured tasks.'},
+'Shame':{n:'Shame involves self-evaluation from the perspective of others. The prefrontal cortex is active here: it integrates social norms and one\'s own behaviour and evaluates both. Zhu et al. (2025) identify the temporoparietal junction (TPJ) \u2014 in close connection with prefrontal areas \u2014 as a key structure for shame sensitivity: individuals who respond less actively here to social diffusion of responsibility experience stronger responsibility-based shame.',l:'Educators can help transform destructive shame (\u201cI am wrong\u201d) into constructive reflection: \u201cI did something wrong \u2014 what can I learn from this?\u201d Shame and guilt are neurobiologically distinct: guilt is directed at an action, shame at the self. Knowing this difference helps find the right language in feedback situations.'},
+'Pride':{n:'Pride in one\'s own achievements activates the central part of the prefrontal cortex responsible for self-perception: \u201cWho am I, and what can I do?\u201d',l:'Targeted recognition of learning progress strengthens self-image and activates systems that motivate further learning.'},
+'Awe':{n:'In awe, automatic thinking patterns are briefly suspended. The prefrontal cortex remains active to make sense of the unexpected \u2014 but without fixed prior assumptions.',l:'Experiences of awe open cognitive windows. They can be pedagogically triggered through unexpected impulses, contradictions, or phenomena that challenge existing assumptions.'},
+'Curiosity':{n:'Curiosity requires the ability to perceive an information gap and experience it as motivating. The prefrontal cortex directs where attention goes.',l:'Learning environments that deliberately make knowledge gaps visible \u2014 through open questions, contradictions, or puzzles \u2014 activate curiosity-based learning motivation.'}
+},source:'LeDoux (2015); Damasio (1994); Milad & Quirk (2012); Kandel et al. (2021)'}},
+
+amygdala:{de:{name:'Amygdala',latin:'Corpus amygdaloideum',
+desc:['Die Amygdala ist etwa so gro\u00df wie eine Mandel und liegt tief im Schl\u00e4fenlappen. Sie ist das Fr\u00fchwarnsystem des Gehirns: Sie scannt st\u00e4ndig die Umgebung auf m\u00f6gliche Bedrohungen oder emotionale Bedeutung \u2014 und das deutlich schneller als unser bewusstes Denken.',
+'LeDoux (1996) beschrieb, dass bedrohliche Eindr\u00fccke die Amygdala auf zwei Wegen erreichen: einen sehr schnellen, noch vor jeder bewussten Analyse, und einen langsameren, der das denkende Gehirn einbezieht. Das erkl\u00e4rt, warum wir manchmal reagieren, bevor wir wissen warum.'],
+learning:'Eine aktivierte Amygdala ver\u00e4ndert das Lerngeschehen grundlegend: Kognitive Kapazit\u00e4t wird auf Bedrohungsabwehr umgeleitet, das Aufnehmen neuer Inhalte tritt in den Hintergrund. Gleichzeitig speichert die Amygdala emotional aufgeladene Erfahrungen besonders tief. Eine Atmosph\u00e4re der Sicherheit h\u00e4lt die Amygdala ruhig und macht Lernen erst m\u00f6glich.',
+emotions:{
+'\u00c4rger':{n:'\u00c4rger entsteht h\u00e4ufig, wenn die Amygdala eine Situation als Bedrohung oder Ungerechtigkeit bewertet. Die k\u00f6rperliche Erregung \u2014 Anspannung, Hitze, erh\u00f6hter Puls \u2014 wird von ihr koordiniert.',l:'\u00c4rger im Kurs ist oft ein Hinweis auf verletzte Erwartungen oder wahrgenommene Ungerechtigkeiten. Ihn wahrzunehmen ohne ihn sofort zu l\u00f6sen ist eine p\u00e4dagogische Haltung.'},
+'Angst':{n:'Die Amygdala ist die zentrale Schaltstelle f\u00fcr Angst. Sie erkennt Bedrohungsreize, koordiniert die k\u00f6rperliche Alarmreaktion (Herzklopfen, Adrenalin, erh\u00f6hte Wachheit) und speichert, welche Situationen gef\u00e4hrlich waren.',l:'Wenn Teilnehmende Angst vor Blamage oder Versagen haben, ist ihre Amygdala aktiv. Das reduziert die Kapazit\u00e4t f\u00fcr neues Denken. Wer das wei\u00df, kann gezielte entlastende Bedingungen schaffen.'},
+'Scham':{n:'Antizipierte soziale Ablehnung \u2014 \u201eWas werden die anderen denken?\u201c \u2014 aktiviert die Amygdala \u00e4hnlich wie eine physische Bedrohung. Das erkl\u00e4rt die k\u00f6rperliche Intensit\u00e4t von Schamerleben. Eine Meta-Analyse von Piretti et al. (2023) best\u00e4tigt, dass Scham \u2014 anders als Schuld \u2014 mit starker Aktivierung im anterioren Cingulum und im Thalamus verbunden ist, Arealen, die auch physischen Schmerz verarbeiten.',l:'Scham kann Lernbereitschaft blockieren. Lernumgebungen, die Fehler als Teil des Prozesses rahmen, reduzieren die Schamaktivierung. Peinlichkeit und Scham aktivieren dar\u00fcber hinaus Bereiche, die f\u00fcr motorische und sprachliche Hemmung zust\u00e4ndig sind (Piretti et al., 2023) \u2014 was erkl\u00e4rt, warum beschmte Lernende verstummen.'},
+'Neid':{n:'Die Wahrnehmung, dass andere Vorteile haben, die man selbst nicht hat, aktiviert die Amygdala als schmerzhaften sozialen Reiz \u2014 besonders wenn dies als ungerecht empfunden wird (Takahashi et al., 2009).',l:'Neid im Lernkontext kann als Signal f\u00fcr unerf\u00fcllte eigene Ziele oder wahrgenommene Ungleichheit gelesen werden \u2014 eine Reflexionsm\u00f6glichkeit statt eines moralischen Problems.'},
+'Trauer':{n:'Trauer aktiviert die Amygdala, besonders beim Erinnern an Verlorenes. Sie markiert diese Erinnerungen als emotional bedeutsam.',l:'Wenn Teilnehmende trauern, ist ihre kognitive Verf\u00fcgbarkeit eingeschr\u00e4nkt. Sensibilit\u00e4t f\u00fcr solche Zust\u00e4nde geh\u00f6rt zur professionellen Haltung.'},
+'Liebe':{n:'Die Amygdala ist auch bei positiver Bindung aktiv: Bei der Wahrnehmung einer geliebten Person bewertet sie schnell \u201ebedeutsam und sicher\u201c \u2014 eine Grundbedingung f\u00fcr N\u00e4he und Vertrauen.',l:'Vertrauen und Wertsch\u00e4tzung im Lernraum aktivieren positive Amygdala-Bewertungen. Sie schaffen die emotionale Grundlage, auf der Lernen gelingt.'}
+},source:'LeDoux (1996, 2015); Takahashi et al. (2009); Bear et al. (2020)'},
+en:{name:'Amygdala',latin:'Corpus amygdaloideum',
+desc:['The amygdala is roughly the size of an almond and lies deep in the temporal lobe. It is the brain\'s early warning system: it constantly scans the environment for possible threats or emotional significance \u2014 and does so far faster than our conscious thinking.',
+'LeDoux (1996) described how threatening impressions reach the amygdala via two pathways: a very fast one, before any conscious analysis, and a slower one involving the thinking brain. This explains why we sometimes react before we know why.'],
+learning:'An activated amygdala fundamentally changes the learning process: cognitive capacity is redirected toward threat response, and absorbing new content takes a back seat. At the same time, the amygdala stores emotionally charged experiences particularly deeply. An atmosphere of safety keeps the amygdala calm and makes learning possible in the first place.',
+emotions:{
+'Anger':{n:'Anger often arises when the amygdala appraises a situation as a threat or injustice. The physical arousal \u2014 tension, heat, increased pulse \u2014 is coordinated by it.',l:'Anger in the classroom is often a signal of violated expectations or perceived injustice. Noticing it without immediately resolving it is a pedagogical stance.'},
+'Fear':{n:'The amygdala is the central hub for fear. It recognises threat stimuli, coordinates the physical alarm response (racing heart, adrenaline, heightened alertness) and stores which situations were dangerous.',l:'When participants fear embarrassment or failure, their amygdala is active. This reduces capacity for new thinking. Knowing this enables deliberate, relieving conditions.'},
+'Shame':{n:'Anticipated social rejection \u2014 \u201cWhat will others think?\u201d \u2014 activates the amygdala similarly to a physical threat. This explains the physical intensity of shame. A meta-analysis by Piretti et al. (2023) confirms that shame \u2014 unlike guilt \u2014 is associated with strong activation in the anterior cingulate cortex and thalamus, areas also involved in processing physical pain.',l:'Shame can block readiness to learn. Learning environments that frame mistakes as part of the process reduce shame activation. Shame and embarrassment also activate areas responsible for motor and speech inhibition (Piretti et al., 2023) \u2014 which explains why shamed learners go silent.'},
+'Envy':{n:'Perceiving that others have advantages one does not activates the amygdala as a painful social stimulus \u2014 especially when felt to be unfair (Takahashi et al., 2009).',l:'Envy in a learning context can be read as a signal of unfulfilled personal goals or perceived inequality \u2014 an opportunity for reflection rather than a moral problem.'},
+'Grief':{n:'Grief activates the amygdala, especially when remembering what has been lost. It marks these memories as emotionally significant.',l:'When participants are grieving, their cognitive availability is limited. Sensitivity to such states belongs to the professional stance in adult education.'},
+'Love':{n:'The amygdala is also active in positive bonding: when perceiving a loved person, it quickly evaluates \u201csignificant and safe\u201d \u2014 a basic condition for closeness and trust.',l:'Trust and appreciation in the learning space activate positive amygdala appraisals. They create the emotional foundation on which learning succeeds.'}
+},source:'LeDoux (1996, 2015); Takahashi et al. (2009); Bear et al. (2020)'}},
+
+hippocampus:{de:{name:'Hippocampus',latin:'Hippocampus',
+desc:['Der Hippocampus liegt im Schl\u00e4fenlappen und ist die zentrale Ged\u00e4chtnisstruktur des Gehirns. Er ist unvrzichtbar daf\u00fcr, dass Erfahrungen dauerhaft gespeichert werden \u2014 also vom Kurzzeitged\u00e4chtnis ins Langzeitged\u00e4chtnis \u00fcbergehen.',
+'Er speichert nicht nur Inhalte, sondern auch den Kontext \u2014 wann, wo und wie etwas erlebt wurde. Die enge Zusammenarbeit mit der Amygdala erkl\u00e4rt, warum emotional bedeutsame Momente besonders tief eingep\u00e4gt werden.'],
+learning:'Neues Wissen muss mit vorhandenem Wissen verkn\u00fcpft werden \u2014 das ist Hippocampus-Arbeit. Geschichten, Bilder, pers\u00f6nliche Relevanz und emotionaler Bezug st\u00e4rken diesen Prozess. Schlaf ist dabei nicht Luxus, sondern neurobiologische Notwendigkeit: Im Schlaf \u00fcbertr\u00e4gt der Hippocampus Tageserlebnisse ins Langzeitged\u00e4chtnis.',
+emotions:{
+'Angst':{n:'Der Hippocampus speichert, in welchem Kontext Angst erlebt wurde. Er erm\u00f6glicht das Wiedererkennen: \u201eDiese Situation ist wie damals\u201c \u2014 was hilfreich, aber auch belastend sein kann.',l:'Negative Lernerfahrungen aus der Vergangenheit k\u00f6nnen durch \u00e4hnliche Situationen reaktiviert werden. Widerstand oder R\u00fcckzug sind dann Erinnerungsspuren \u2014 kein Unwillen.'},
+'Trauer':{n:'Trauer aktiviert hippocampale Erinnerungen an Verlorenes. Der Hippocampus ruft auf, was einmal war.',l:'Biografische Lernformate k\u00f6nnen bewusst mit Erinnerungen arbeiten. Das kann kl\u00e4rend wirken, erfordert aber einen sicheren Rahmen.'},
+'Sehnsucht':{n:'Sehnsucht entsteht aus dem Kontrast zwischen einer erinnerten Erfahrung und der Gegenwart. Der Hippocampus stellt die Erinnerung bereit, die diesen Kontrast erst erzeugt.',l:'Sehnsucht kann im Lernkontext als Ressource verstanden werden: als Hinweis auf Werte und Ziele, die jemandem wichtig sind.'},
+'Neugier':{n:'Gruber et al. (2014) zeigten: In Zust\u00e4nden hoher Neugier ist der Hippocampus besonders aktiv. Neugier verbessert das Behalten \u2014 nicht nur des Themas, das neugierig gemacht hat, sondern auch von zuf\u00e4llig Pr\u00e4sentem.',l:'Das ist eine direkte Begr\u00fcndung f\u00fcr neugierbasiertes Lernen: Es aktiviert das Ged\u00e4chtnissystem auf eine Weise, die breiter wirkt als gezieltes Einpr\u00e4gen.'},
+'Staunen':{n:'Staunen ersch\u00fcttert bestehendes Wissen \u2014 und genau das macht Platz f\u00fcr Neues. Der Hippocampus aktualisiert beim Staunen das eigene Weltbild.',l:'Didaktisch provozierte Staunenserfahrungen k\u00f6nnen Lernhindernisse senken, weil sie das Gehirn in einen Zustand erh\u00f6hter Aufnahmebereitschaft versetzen.'},
+'Freude':{n:'Freudige Erlebnisse werden durch die Zusammenarbeit von Amygdala und Hippocampus besonders gut gespeichert. Positive Lernmomente hinterlassen tiefere Spuren.',l:'Das ist eine wissenschaftliche Begr\u00fcndung f\u00fcr angenehme Lernatmosph\u00e4ren: Sie verbessern nicht nur die Motivation, sondern die Ged\u00e4chtnisleistung selbst.'}
+},source:'McGaugh (2004); Gruber et al. (2014); Kandel et al. (2021); Squire & Dede (2015)'},
+en:{name:'Hippocampus',latin:'Hippocampus',
+desc:['The hippocampus lies in the temporal lobe and is the brain\'s central memory structure. It is indispensable for experiences to be stored permanently \u2014 for the transfer from short-term to long-term memory.',
+'It stores not only content but also context \u2014 when, where, and how something was experienced. Its close collaboration with the amygdala explains why emotionally significant moments are imprinted particularly deeply.'],
+learning:'New knowledge must be connected to existing knowledge \u2014 that is hippocampal work. Stories, images, personal relevance, and emotional connection strengthen this process. Sleep is not a luxury but a neurobiological necessity: during sleep, the hippocampus transfers daily experiences to long-term memory.',
+emotions:{
+'Fear':{n:'The hippocampus stores the context in which fear was experienced. It enables recognition: \u201cThis situation is like before\u201d \u2014 which can be helpful, but also distressing.',l:'Negative learning experiences from the past can be reactivated by similar situations. Resistance or withdrawal are then memory traces \u2014 not unwillingness.'},
+'Grief':{n:'Grief activates hippocampal memories of what has been lost. The hippocampus summons what once was.',l:'Biographical learning formats can deliberately work with memories. This can have a clarifying effect, but requires a safe framework.'},
+'Longing':{n:'Longing arises from the contrast between a remembered experience and the present. The hippocampus provides the memory that creates this contrast in the first place.',l:'Longing can be understood in a learning context as a resource: as a pointer to values and goals that matter to someone.'},
+'Curiosity':{n:'Gruber et al. (2014) showed: in states of high curiosity, the hippocampus is particularly active. Curiosity improves retention \u2014 not only of the topic that sparked curiosity, but also of incidentally present material.',l:'This directly justifies curiosity-based learning: it activates the memory system in a way that has broader effects than targeted memorisation.'},
+'Awe':{n:'Awe shakes existing knowledge \u2014 and that makes room for the new. During awe, the hippocampus updates one\'s worldview.',l:'Pedagogically provoked experiences of awe can lower learning barriers because they put the brain into a state of heightened receptivity.'},
+'Joy':{n:'Joyful experiences are stored particularly well through the collaboration of the amygdala and hippocampus. Positive learning moments leave deeper traces.',l:'This is a scientific justification for pleasant learning atmospheres: they improve not just motivation, but memory performance itself.'}
+},source:'McGaugh (2004); Gruber et al. (2014); Kandel et al. (2021); Squire & Dede (2015)'}},
+
+acc:{de:{name:'Anteriores Cingulum',latin:'Cortex cingularis anterior (ACC)',
+desc:['Das anteriore Cingulum liegt auf der Innenseite des Gehirns, direkt \u00fcber dem Balken, der die beiden Gro\u00dfhirnhemisph\u00e4ren verbindet. Es ist eine Br\u00fccke zwischen Gef\u00fchl und Denken: Es meldet Konflikte, \u00fcberwacht Fehler und registriert sozialen Schmerz.',
+'Studien zeigen, dass soziale Ausgrenzung \u2014 nicht dazugeh\u00f6ren, abgelehnt werden \u2014 im Gehirn \u00e4hnliche Bereiche aktiviert wie k\u00f6rperlicher Schmerz (Eisenberger et al., 2003). Das anteriore Cingulum ist dabei zentral.'],
+learning:'Das anteriore Cingulum registriert, wenn etwas nicht passt \u2014 eine Erwartung entt\u00e4uscht wird oder ein innerer Konflikt entsteht. Solche Signale sind im Lernprozess wertvoll: Sie zeigen an, dass etwas Wichtiges verarbeitet wird. Sie brauchen einen Rahmen, der Auseinandersetzung statt Vermeidung erm\u00f6glicht.',
+emotions:{
+'Neid':{n:'Takahashi et al. (2009) zeigten, dass das anteriore Cingulum bei Neid stark aktiviert wird. Neid registriert eine Diskrepanz zwischen dem eigenen Stand und dem anderer \u2014 und das schmerzt.',l:'Neid in Lerngruppen kann als Signal daf\u00fcr gelesen werden, dass jemand eigene Ziele intensiv wahrnimmt. Reflexion kann helfen, dieses Signal konstruktiv zu wenden.'},
+'\u00c4rger':{n:'Das anteriore Cingulum ist aktiv, wenn wahrgenommene Ungerechtigkeit verarbeitet wird. Es signalisiert: \u201eDas entspricht nicht meinen Erwartungen.\u201c',l:'\u00c4rger auf Regeln oder Aufgaben kann ein Ausdruck verletzter Gerechtigkeit sein. Das anzuerkennen er\u00f6ffnet Gespr\u00e4che, die \u00c4rger l\u00f6sen k\u00f6nnen.'},
+'Scham':{n:'Scham erzeugt einen inneren Konflikt: wie ich bin versus wie ich sein sollte. Das anteriore Cingulum verarbeitet genau diesen Widerspruch. Piretti et al. (2023) zeigen in ihrer Meta-Analyse, dass das anteriore Cingulum bei Scham und Peinlichkeit st\u00e4rker aktiviert ist als bei Schuld \u2014 ein Befund, der die besondere N\u00e4he von Scham zu sozialem Schmerz und Selbstbedrohung unterstreicht.',l:'Wenn Lernende schweigen oder sich zur\u00fcckziehen, kann dahinter Scham stecken. Fine et al. (2023) zeigen, dass Scham \u2014 im Unterschied zu Schuld \u2014 mit ver\u00e4nderter interoceptiver Signalgebung verbunden ist: Das K\u00f6rpergef\u00fchl wird abgeschw\u00e4cht, nicht verst\u00e4rkt. Das erkl\u00e4rt, warum Scham manchmal wie Taubheit oder Dissoziation erlebt wird.'},
+'Angst':{n:'Das anteriore Cingulum lenkt bei Bedrohung die Aufmerksamkeit auf das, was gef\u00e4hrlich erscheint. Es ist Teil des Systems, das Alarm und Denken koordiniert.',l:'Angst verengt den Aufmerksamkeitsfokus messbar. Das erkl\u00e4rt, warum Angst breites und kreatives Denken erschwert.'},
+'Trauer':{n:'Sozialer Verlust \u2014 Einsamkeit, Trennung, Ausgrenzung \u2014 aktiviert das anteriore Cingulum wie Schmerz (Eisenberger et al., 2003). Das ist keine Metapher, sondern eine neurologische Realit\u00e4t.',l:'Gef\u00fchle der Nichtzugeh\u00f6rigkeit im Lernkontext sind neurobiologisch schmerzhaft. Inklusive Lernkulturen sch\u00fctzen direkt das Wohlbefinden und die Lernf\u00e4higkeit.'},
+'Staunen':{n:'Staunen entsteht, wenn etwas nicht ins bisherige Weltbild passt. Das anteriore Cingulum erkennt diese Diskrepanz.',l:'Gezielte kognitive Irritationen \u2014 unerwartete Perspektiven, \u00fcberraschende Fakten \u2014 aktivieren das anteriore Cingulum produktiv und machen neues Lernen wahrscheinlicher.'}
+},source:'Botvinick et al. (2004); Takahashi et al. (2009); Eisenberger et al. (2003)'},
+en:{name:'Anterior Cingulate Cortex',latin:'Cortex cingularis anterior (ACC)',
+desc:['The anterior cingulate cortex lies on the inner surface of the brain, directly above the corpus callosum connecting the two hemispheres. It is a bridge between feeling and thinking: it reports conflicts, monitors errors, and registers social pain.',
+'Studies show that social exclusion \u2014 not belonging, being rejected \u2014 activates similar brain areas as physical pain (Eisenberger et al., 2003). The anterior cingulate cortex is central to this.'],
+learning:'The anterior cingulate cortex registers when something does not fit \u2014 when an expectation is disappointed or an inner conflict arises. Such signals are valuable in learning: they indicate that something important is being processed. They need a framework that enables engagement rather than avoidance.',
+emotions:{
+'Envy':{n:'Takahashi et al. (2009) showed that the anterior cingulate cortex is strongly activated during envy. Envy registers a discrepancy between one\'s own position and others\' \u2014 and that hurts.',l:'Envy in learning groups can be read as a signal that someone is intensely aware of their own goals. Reflection can help turn this signal constructively.'},
+'Anger':{n:'The anterior cingulate cortex is active when perceived injustice is processed. It signals: \u201cThis does not match my expectations.\u201d',l:'Anger at rules or tasks can be an expression of violated fairness. Acknowledging this opens conversations that can resolve anger.'},
+'Shame':{n:'Shame creates an inner conflict: how I am versus how I should be. The anterior cingulate cortex processes exactly this contradiction. Piretti et al. (2023) show in their meta-analysis that the anterior cingulate is more strongly activated in shame and embarrassment than in guilt \u2014 a finding that underscores shame\'s particular closeness to social pain and self-threat.',l:'When learners go quiet or withdraw, shame may be behind it. Fine et al. (2023) show that shame \u2014 unlike guilt \u2014 is associated with blunted interoceptive signalling: the bodily sense is dampened, not amplified. This explains why shame is sometimes experienced as numbness or dissociation rather than acute distress.'},
+'Fear':{n:'During threat, the anterior cingulate cortex directs attention toward what appears dangerous. It is part of the system coordinating alarm and thinking.',l:'Fear measurably narrows attentional focus. This explains why fear impedes broad and creative thinking.'},
+'Grief':{n:'Social loss \u2014 loneliness, separation, exclusion \u2014 activates the anterior cingulate like pain (Eisenberger et al., 2003). This is not a metaphor, but a neurological reality.',l:'Feelings of non-belonging in a learning context are neurobiologically painful. Inclusive learning cultures directly protect wellbeing and learning capacity.'},
+'Awe':{n:'Awe arises when something does not fit the existing worldview. The anterior cingulate cortex recognises this discrepancy.',l:'Deliberate cognitive disruptions \u2014 unexpected perspectives, surprising facts \u2014 activate the anterior cingulate productively and make new learning more likely.'}
+},source:'Botvinick et al. (2004); Takahashi et al. (2009); Eisenberger et al. (2003)'}},
+
+insula:{de:{name:'Insula',latin:'Insula (Lobus insularis)',
+desc:['Die Insula liegt versteckt in einer Furche des Gehirns, verdeckt von anderen Bereichen. Sie ist das Zentrum der K\u00f6rperwahrnehmung: Sie bringt innere K\u00f6rperzust\u00e4nde ins Bewusstsein \u2014 Herzschlag, Atem, W\u00e4rme, Druck. Diese F\u00e4higkeit hei\u00dft Interozeption.',
+'Die Insula verbindet k\u00f6rperliches Erleben mit Emotion. Wenn wir mitf\u00fchlen, wenn jemand anderem etwas passiert, aktiviert sich die Insula \u2014 Empathie hat eine k\u00f6rperliche Grundlage.'],
+learning:'Die Insula macht Emotionen k\u00f6rperlich sp\u00fcrbar. Wenn Lernende lernen, ihre K\u00f6rpersignale wahrzunehmen \u2014 \u201eIch sp\u00fcre Anspannung\u201c, \u201eIch bin gerade aufgeregt\u201c \u2014 trainieren sie eine Grundlage f\u00fcr Emotionsregulation und Selbstwahrnehmung.',
+emotions:{
+'Scham':{n:'Scham hat eine starke k\u00f6rperliche Seite: Err\u00f6ten, Hitzegef\u00fchl, der Wunsch zu verschwinden. Die Insula registriert diese K\u00f6rpersignale und bringt sie ins Bewusstsein. Die Neuroimaging-Meta-Analyse von Piretti et al. (2023) zeigt, dass die linke anteriore Insula die einzige Hirnregion ist, die bei Scham und Schuld gleicherma\u00dfen aktiv ist \u2014 ein Hinweis auf ihre zentrale Rolle bei selbstbewussten Emotionen. Zhu et al. (2025) identifizieren dar\u00fcber hinaus die posteriore Insula als Schl\u00fcsselstruktur f\u00fcr Ungerechtigkeitserleben, das Scham ausl\u00f6sen kann.',l:'K\u00f6rperorientierte Reflexionsmethoden \u2014 \u201eWo sp\u00fcrst du das gerade?\u201c \u2014 k\u00f6nnen Schamerleben zug\u00e4nglich und bearbeitbar machen. Scham und Schuld teilen sich die Insula als gemeinsamen neuronalen Nenner, unterscheiden sich aber in anderen Arealen: Ein Verst\u00e4ndnis dieser Differenz kann helfen, konstruktive Selbstreflexion (eher Schuldgef\u00fchl) von l\u00e4hmender Selbstverurteilung (eher Scham) zu f\u00f6rdern.'},
+'Neid':{n:'Neid ist k\u00f6rperlich unangenehm: ein inneres Ziehen, ein Unbehagen. Die Insula vermittelt dieses K\u00f6rpergef\u00fchl ins Bewusstsein.',l:'Zu erkennen, dass Neid sich im K\u00f6rper zeigt, kann helfen, ihn fr\u00fcher wahrzunehmen und bewusster damit umzugehen.'},
+'Liebe':{n:'Das Gef\u00fchl von W\u00e4rme und Verbundenheit \u2014 bei romantischer wie bei elterlicher Liebe \u2014 wird von der Insula vermittelt. Sie \u00fcbersetzt soziale N\u00e4he in k\u00f6rperliche Empfindung.',l:'Zugeh\u00f6rigkeitsgef\u00fchle in Lerngruppen haben eine k\u00f6rperliche Qualit\u00e4t. Eine warme Lernatmosph\u00e4re ist buchst\u00e4blich k\u00f6rperlich sp\u00fcrbar.'},
+'Angst':{n:'Das k\u00f6rperliche Gef\u00fchl von Angst \u2014 Herzrasen, Enge, Atemnot \u2014 wird von der Insula ins Bewusstsein gebracht. Erst dort wird die K\u00f6rperreaktion zu \u201eIch habe Angst\u201c.',l:'Atem\u00fcbungen und Body-Scan-Methoden greifen direkt hier an: Sie schulen die Wahrnehmung k\u00f6rperlicher Erregungszust\u00e4nde und erm\u00f6glichen deren Regulation.'},
+'\u00c4rger':{n:'\u00c4rger hat eine k\u00f6rperliche Qualit\u00e4t: W\u00e4rme, Druck, Anspannung. Die Insula bringt diese Sensationen ins Bewusstsein.',l:'Das Bewusstsein f\u00fcr k\u00f6rperliche \u00c4rgerhinweise hilft, fr\u00fcher zu bemerken, wann jemand in einem Erregungszustand ist \u2014 bei sich selbst und bei anderen.'},
+'Staunen':{n:'Staunen hat eine k\u00f6rperliche Seite: G\u00e4nsehaut, angehaltener Atem, ein Gef\u00fchl des Ge\u00f6ffnetseins. Die Insula registriert diese K\u00f6rperreaktionen.',l:'\u201eWas hat dich gerade k\u00f6rperlich ber\u00fchrt?\u201c er\u00f6ffnet andere Zug\u00e4nge als rein kognitive Fragen und macht Staunen f\u00fcr Reflexion nutzbar.'}
+},source:'Craig (2009); Takahashi et al. (2009); Nummenmaa et al. (2014); Damasio (1999)'},
+en:{name:'Insula',latin:'Insula (Lobus insularis)',
+desc:['The insula lies hidden in a fold of the brain, covered by other areas. It is the centre of body awareness: it brings inner body states into consciousness \u2014 heartbeat, breathing, warmth, pressure. This capacity is called interoception.',
+'The insula connects bodily experience with emotion. When we feel with someone else, the insula activates \u2014 empathy has a physical foundation.'],
+learning:'The insula makes emotions physically tangible. When learners learn to notice their body signals \u2014 \u201cI feel tension\u201d, \u201cI am excited right now\u201d \u2014 they are training a foundation for emotion regulation and self-awareness.',
+emotions:{
+'Shame':{n:'Shame has a strong physical side: flushing, heat, the urge to disappear. The insula registers these body signals and brings them to consciousness. The neuroimaging meta-analysis by Piretti et al. (2023) shows that the left anterior insula is the only brain region equally active in both shame and guilt \u2014 pointing to its central role in self-conscious emotions. Zhu et al. (2025) additionally identify the posterior insula as a key structure for the sense of inequity that can trigger shame.',l:'Body-oriented reflection methods \u2014 \u201cWhere do you feel this right now?\u201d \u2014 can make shame accessible and workable. Shame and guilt share the insula as a common neural denominator, but differ in other areas: understanding this distinction can help foster constructive self-reflection (closer to guilt) over paralysing self-condemnation (closer to shame).'},
+'Envy':{n:'Envy is physically uncomfortable: an inner pull, a discomfort. The insula conveys this bodily sensation to consciousness.',l:'Recognising that envy shows up in the body can help notice it earlier and deal with it more consciously.'},
+'Love':{n:'The feeling of warmth and connectedness \u2014 in romantic as in parental love \u2014 is conveyed by the insula. It translates social closeness into physical sensation.',l:'Feelings of belonging in learning groups have a physical quality. A warm learning atmosphere is literally physically palpable.'},
+'Fear':{n:'The physical feeling of fear \u2014 racing heart, tightness, shortness of breath \u2014 is brought to consciousness by the insula. Only there does the physical reaction become \u201cI am afraid\u201d.',l:'Breathing exercises and body scan methods act directly here: they train awareness of physical arousal states and enable their regulation.'},
+'Anger':{n:'Anger has a physical quality: warmth, pressure, tension. The insula brings these sensations to consciousness.',l:'Awareness of physical anger signals helps notice earlier when someone is in a state of arousal \u2014 in oneself and in others.'},
+'Awe':{n:'Awe has a physical side: goosebumps, held breath, a sense of openness. The insula registers these bodily reactions.',l:'\u201cWhat just touched you physically?\u201d opens different access routes than purely cognitive questions and makes awe useful for reflection.'}
+},source:'Craig (2009); Takahashi et al. (2009); Nummenmaa et al. (2014); Damasio (1999)'}},
+
+nucleus:{de:{name:'Nucleus Accumbens',latin:'Nucleus accumbens (ventrales Striatum)',
+desc:['Der Nucleus accumbens liegt tief im Gehirn und ist das Herzst\u00fcck des Belohnungssystems. Er empf\u00e4ngt Dopamin \u2014 einen Botenstoff, der Erwartung und Motivation erzeugt \u2014 und reagiert auf alles, was sich lohnt: Erfolg, Entdeckung, soziale Anerkennung.',
+'Wichtig: Es geht weniger darum, Belohnung zu empfangen, als darum, sie zu erwarten. Berridge & Robinson (1998) unterscheiden \u201eWollen\u201c (Verlangen, etwas zu erreichen) und \u201eMogen\u201c (Genuss beim Erreichen). Der Nucleus accumbens ist vor allem f\u00fcr das Wollen zust\u00e4ndig.'],
+learning:'Das Belohnungssystem ist der Motor des Lernens. Wenn Lernen mit Kompetenzerleben, Entdeckung oder Zugeh\u00f6rigkeit verbunden ist, sch\u00fcttet das Gehirn Dopamin aus \u2014 das motiviert zur Wiederholung. Lernen unter \u00e4u\u00dferem Druck allein aktiviert dieses System kaum und ist deshalb weniger nachhaltig.',
+emotions:{
+'Freude':{n:'Freude aktiviert das Belohnungssystem: Bei positivem Erleben sch\u00fcttet das ventrale tegmentale Areal (VTA) im Hirnstamm Dopamin aus, das im Nucleus accumbens Wohlbefinden erzeugt.',l:'Freude im Lernprozess ist kein Nice-to-have. Sie ist ein neurobiologischer Verst\u00e4rker: Was Freude macht, wird wiederholt, erinnert und vertieft.'},
+'Neugier':{n:'Gruber et al. (2014) zeigten, dass Neugier denselben Nucleus accumbens aktiviert wie externe Belohnungen. Das Wollen, eine Wissensf\u00fcnke zu schlie\u00dfen, f\u00fchlt sich im Gehirn \u00e4hnlich an wie das Wollen nach Nahrung.',l:'Neugier ist intrinsische Motivation mit neurobiologischer Basis. Lernumgebungen, die Neugier erzeugen, aktivieren das Gehirn grundlegend anders als Pflichtgef\u00fchl.'},
+'Liebe':{n:'Romantische Liebe ist eine der st\u00e4rksten Aktivierungen des Nucleus accumbens. Das Gehirn behandelt die geliebte Person neurochemisch wie eine Belohnung.',l:'Soziale Verbundenheit und Zugeh\u00f6rigkeit aktivieren das Belohnungssystem \u2014 schw\u00e4cher als romantische Liebe, aber nachhaltiger. Das gibt tiefe motivationale Wirkung in Lerngruppen.'},
+'Stolz':{n:'Stolz auf eigene Leistungen aktiviert das Belohnungssystem. Die Selbstzuschreibung von Erfolg l\u00f6st Dopaminaussch\u00fcttung aus \u2014 \u00e4hnlich wie externe Belohnungen (Tracy & Robins, 2007).',l:'Lernende sollten Erfolge nicht nur extern best\u00e4tigt bekommen, sondern selbst zuschreiben k\u00f6nnen. \u201eWas habe ich dazu beigetragen?\u201c st\u00e4rkt das intrinsische Belohnungsgef\u00fchl.'},
+'Sehnsucht':{n:'Sehnsucht enth\u00e4lt Vorwegnahme: Das Gehirn antizipiert etwas Gew\u00fcnschtes. Der Nucleus accumbens ist an dieser vorausgreifenden Motivationsstruktur beteiligt.',l:'Sehnsucht kann als Ressource genutzt werden: Sie zeigt an, was jemanden wirklich bewegt. Biografische Ans\u00e4tze k\u00f6nnen daran ankn\u00fcpfen.'},
+'Neid':{n:'Neid aktiviert neben dem anterioren Cingulum auch Teile des Belohnungssystems \u2014 besonders wenn das Ungl\u00fcck anderer zu eigenen Vorteilen f\u00fchrt (Takahashi et al., 2009).',l:'Neid ist nicht nur ein Schmerz-, sondern auch ein Motivationssignal. Er zeigt an, was jemand selbst anstrebt. Das l\u00e4sst sich p\u00e4dagogisch nutzbar machen.'}
+},source:'Berridge & Robinson (1998); Gruber et al. (2014); Panksepp (1998); Takahashi et al. (2009)'},
+en:{name:'Nucleus Accumbens',latin:'Nucleus accumbens (ventral striatum)',
+desc:['The nucleus accumbens lies deep in the brain and is the core of the reward system. It receives dopamine \u2014 a messenger generating expectation and motivation \u2014 and responds to everything that pays off: success, discovery, social recognition.',
+'Importantly, it is less about receiving reward and more about expecting it. Berridge & Robinson (1998) distinguish \u201cwanting\u201d (the drive to achieve something) and \u201cliking\u201d (the enjoyment of achieving it). The nucleus accumbens is primarily responsible for wanting.'],
+learning:'The reward system is the engine of learning. When learning is associated with experiences of competence, discovery, or belonging, the brain releases dopamine \u2014 motivating repetition. Learning under external pressure alone barely activates this system and is therefore less sustainable.',
+emotions:{
+'Joy':{n:'Joy activates the reward system: during positive experiences, the ventral tegmental area (VTA) in the brainstem releases dopamine, which generates wellbeing in the nucleus accumbens.',l:'Joy in the learning process is not a nice-to-have. It is a neurobiological amplifier: what brings joy is repeated, remembered, and deepened.'},
+'Curiosity':{n:'Gruber et al. (2014) showed that curiosity activates the same nucleus accumbens as external rewards. The wanting to close a knowledge gap feels similar in the brain to wanting food.',l:'Curiosity is intrinsic motivation with a neurobiological basis. Learning environments that generate curiosity activate the brain fundamentally differently from duty.'},
+'Love':{n:'Romantic love is one of the strongest activations of the nucleus accumbens. The brain treats the loved person neurochemically like a reward.',l:'Social connectedness and belonging activate the reward system \u2014 less intensely than romantic love, but more sustainably. This creates deep motivational effects in learning groups.'},
+'Pride':{n:'Pride in one\'s own achievements activates the reward system. Self-attribution of success triggers dopamine release \u2014 similar to external rewards (Tracy & Robins, 2007).',l:'Learners should not only receive external confirmation of success but also be able to attribute it themselves. \u201cWhat did I contribute?\u201d strengthens the intrinsic reward feeling.'},
+'Longing':{n:'Longing contains anticipation: the brain anticipates something desired. The nucleus accumbens is involved in this forward-looking motivational structure.',l:'Longing can be used as a resource: it signals what truly moves someone. Biographical approaches can build on this.'},
+'Envy':{n:'Alongside the anterior cingulate, envy also activates parts of the reward system \u2014 particularly when another\'s misfortune leads to one\'s own advantage (Takahashi et al., 2009).',l:'Envy is not only a pain signal but also a motivation signal. It indicates what someone is striving for. This can be used pedagogically.'}
+},source:'Berridge & Robinson (1998); Gruber et al. (2014); Panksepp (1998); Takahashi et al. (2009)'}},
+
+thalamus:{de:{name:'Thalamus',latin:'Thalamus',
+desc:['Der Thalamus liegt in der Mitte des Gehirns und ist die zentrale Schaltstelle f\u00fcr Sinneseindr\u00fccke. Fast alles, was wir sehen, h\u00f6ren, f\u00fchlen oder schmecken, l\u00e4uft erst durch den Thalamus, bevor es die Gro\u00dfhirnrinde erreicht \u2014 er ist das \u201eTor zum Bewusstsein\u201c.',
+'LeDoux (1996) beschrieb, dass bedrohliche Sinnesreize vom Thalamus auf zwei Wegen weitergeleitet werden: direkt zur Amygdala (schnell, ungef\u00e4hr, reflexartig) und zur Gro\u00dfhirnrinde (langsamer, pr\u00e4ziser).'],
+learning:'Der Thalamus reguliert, wie viel von der Au\u00dfenwelt das Gehirn erreicht. Bei starker emotionaler Aktivierung \u2014 Stress, Angst, \u00dcberforderung \u2014 ver\u00e4ndert sich diese Filterung. Das erkl\u00e4rt, warum Wahrnehmung sich in Stresssituationen verengt.',
+emotions:{
+'Angst':{n:'Der Thalamus ist Startpunkt der schnellen Bedrohungsreaktion: Er schickt einen Vorabalarm direkt an die Amygdala \u2014 noch bevor der Kortex die Situation analysiert hat.',l:'Das erkl\u00e4rt, warum manche Teilnehmende auf Pr\u00fcfungen oder Kritik reaktiv reagieren, bevor sie nachgedacht haben: Der Weg vom Thalamus zur Amygdala ist schneller als das Denken.'},
+'Staunen':{n:'Staunen kann durch sensorische \u00dcberw\u00e4ltigung entstehen. Der Thalamus reguliert, wie intensiv solche Eindr\u00fccke die Gro\u00dfhirnrinde erreichen.',l:'Intensive sensorische Erfahrungen \u2014 Musik, Natur, Kunst \u2014 k\u00f6nnen \u00fcber den Thalamus T\u00fcr\u00f6ffner f\u00fcr Lernmomente sein.'},
+'Freude':{n:'Positive Sinneseindr\u00fccke werden \u00fcber den Thalamus weitergeleitet und k\u00f6nnen Freude und Wohlbefinden ausl\u00f6sen.',l:'Die Gestaltung von Lernr\u00e4umen hat sensorische Qualit\u00e4t: Licht, Klang und Atmosph\u00e4re beeinflussen, wie Lernende auf eine Lernumgebung reagieren.'}
+},source:'LeDoux (1996); Bear et al. (2020); Kandel et al. (2021)'},
+en:{name:'Thalamus',latin:'Thalamus',
+desc:['The thalamus lies in the centre of the brain and is the central relay station for sensory information. Almost everything we see, hear, feel, or taste passes through the thalamus before reaching the cerebral cortex \u2014 it is the \u201cgateway to consciousness\u201d.',
+'LeDoux (1996) described that threatening sensory stimuli are relayed from the thalamus via two pathways: directly to the amygdala (fast, approximate, reflexive) and to the cerebral cortex (slower, more precise).'],
+learning:'The thalamus regulates how much of the outside world actually reaches the brain. Under strong emotional activation \u2014 stress, fear, overwhelm \u2014 this filtering changes. This explains why perception narrows in stressful situations.',
+emotions:{
+'Fear':{n:'The thalamus is the starting point of the rapid threat response: it sends an early warning directly to the amygdala \u2014 before the cortex has analysed the situation.',l:'This explains why some participants react to exams or criticism before they have thought it through: the path from thalamus to amygdala is faster than thinking.'},
+'Awe':{n:'Awe can arise from sensory overwhelm. The thalamus regulates how intensely such impressions reach the cerebral cortex.',l:'Intense sensory experiences \u2014 music, nature, art \u2014 can act as door-openers for learning moments via the thalamus.'},
+'Joy':{n:'Positive sensory impressions are relayed via the thalamus and can trigger joy and wellbeing.',l:'The design of learning spaces has sensory quality: light, sound, and atmosphere influence how learners respond to a learning environment.'}
+},source:'LeDoux (1996); Bear et al. (2020); Kandel et al. (2021)'}},
+
+hypothalamus:{de:{name:'Hypothalamus',latin:'Hypothalamus',
+desc:['Der Hypothalamus liegt knapp unterhalb des Thalamus und ist die Steuerzentrale f\u00fcr das Gleichgewicht des K\u00f6rpers. Er reguliert Hunger, Durst, Schlaf und K\u00f6rpertemperatur \u2014 und koordiniert, wie das Gehirn auf Stress reagiert: \u00fcber Hormone.',
+'Wenn die Amygdala Alarm schl\u00e4gt, aktiviert der Hypothalamus die Stressachse (HPA-Achse): Eine Kaskade f\u00fchrt zur Aussch\u00fcttung von Cortisol \u2014 dem wichtigsten Stresshormon. Cortisol bereitet den K\u00f6rper auf Kampf oder Flucht vor.'],
+learning:'Chronischer Stress \u2014 anhaltend hohe Cortisolspiegel \u2014 schadet dem Hippocampus und damit der Ged\u00e4chtnisbildung. Kurzer, \u00fcberschaubarer Stress kann dagegen die Aufmerksamkeit sch\u00e4rfen. Das Stressniveau von Lernenden ist keine rein psychosoziale Frage, sondern eine neurobiologische Bedingung des Lernens.',
+emotions:{
+'Angst':{n:'Bei Angst aktiviert der Hypothalamus die Aussch\u00fcttung von Cortisol und Adrenalin. Diese Hormone erh\u00f6hen Herzschlag, Atemfrequenz und Muskelspannung \u2014 der K\u00f6rper macht sich bereit.',l:'Anhaltende Angst im Lernkontext erzeugt chronischen Stress mit messbaren Folgen f\u00fcr Ged\u00e4chtnis und Konzentration. Entspannungsphasen sind neurobiologisch notwendig.'},
+'\u00c4rger':{n:'\u00c4rger aktiviert \u00fcber die Amygdala den Hypothalamus: Das sympathische Nervensystem erh\u00f6ht Blutdruck und Muskeltonus.',l:'\u00c4rger im Kursraum hat eine k\u00f6rperliche Dynamik. Kurze Unterbrechungen, Bewegung oder Atem\u00fcbungen k\u00f6nnen das Erregungsniveau regulieren.'},
+'Liebe':{n:'Der Hypothalamus produziert Oxytocin \u2014 das Bindungshormon. Es wirkt bei Ber\u00fchrung, Blickkontakt und sozialer W\u00e4rme und ist zentral f\u00fcr Vertrauen und N\u00e4he. Eine randomisierte Studie von Zheng et al. (2024) zeigt, dass Oxytocin \u2014 nicht aber das verwandte Hormon Vasopressin \u2014 das Erleben von Scham und Schuld bei absichtlichem Schaden verst\u00e4rkt und damit prosoziales Verhalten f\u00f6rdert. Das unterstreicht die Rolle von Oxytocin in der moralischen Emotionsregulation.',l:'Echtes Interesse, Wertsch\u00e4tzung und Humor aktivieren Oxytocinaussch\u00fcttung und st\u00e4rken die Bindung zwischen Lernenden und Lehrenden. Oxytocin f\u00f6rdert nicht nur Bindung, sondern auch moralische Sensibilit\u00e4t \u2014 ein Argument daf\u00fcr, dass eine vertrauensvolle Lernbeziehung ethisches Reflektieren beg\u00fcnstigt.'},
+'Langeweile':{n:'Langeweile ist neurobiologisch kein Nullzustand: Chronische Unterstimulation erzeugt ein diffuses Stressmuster. Das Gehirn sucht nach Aktivierung.',l:'Langeweile im Kurs ist ein Signal, dass das Gehirn nicht ausreichend gefordert wird. Abwechslung in Methoden und Tempo reguliert das Aktivierungsniveau direkt.'},
+'Sehnsucht':{n:'Die k\u00f6rperliche Empfindung von Sehnsucht \u2014 ein diffuses Unbehagen, ein k\u00f6rperliches Ziehen \u2014 hat hypothalamische Anteile: Das Gehirn motiviert zur Suche nach dem Vermissten.',l:'Sehnsucht als motivationaler Zustand kann produktiv sein, wenn sie auf erreichbare Ziele gerichtet wird.'}
+},source:'Panksepp (1998); Bear et al. (2020); Eastwood et al. (2012); Kandel et al. (2021)'},
+en:{name:'Hypothalamus',latin:'Hypothalamus',
+desc:['The hypothalamus lies just below the thalamus and is the control centre for the body\'s balance. It regulates hunger, thirst, sleep, and body temperature \u2014 and coordinates how the brain responds to stress: via hormones.',
+'When the amygdala sounds the alarm, the hypothalamus activates the stress axis (HPA axis): a cascade leads to the release of cortisol \u2014 the main stress hormone. Cortisol prepares the body for fight or flight.'],
+learning:'Chronic stress \u2014 sustained high cortisol levels \u2014 damages the hippocampus and therefore memory formation. Brief, manageable stress can sharpen attention. The stress level of learners is not just a psychosocial question but a neurobiological condition of learning.',
+emotions:{
+'Fear':{n:'In fear, the hypothalamus activates the release of cortisol and adrenaline. These hormones increase heart rate, breathing rate, and muscle tension \u2014 the body prepares itself.',l:'Sustained fear in a learning context creates chronic stress with measurable consequences for memory and concentration. Relaxation phases are neurobiologically necessary.'},
+'Anger':{n:'Anger activates the hypothalamus via the amygdala: the sympathetic nervous system increases blood pressure and muscle tone.',l:'Anger in the classroom has a physical dynamic. Brief interruptions, movement, or breathing exercises can regulate arousal levels.'},
+'Love':{n:'The hypothalamus produces oxytocin \u2014 the bonding hormone. It acts during touch, eye contact, and social warmth, and is central to trust and closeness. A randomised trial by Zheng et al. (2024) shows that oxytocin \u2014 unlike the related hormone vasopressin \u2014 amplifies feelings of shame and guilt in response to deliberate harm, thereby promoting prosocial behaviour. This underscores oxytocin\'s role in moral emotion regulation, not just bonding.',l:'Genuine interest, appreciation, and humour activate oxytocin release and strengthen the bond between learners and educators. Oxytocin promotes not only bonding but also moral sensitivity \u2014 an argument that a trusting learning relationship actively supports ethical reflection.'},
+'Boredom':{n:'Boredom is neurobiologically not a null state: chronic understimulation creates a diffuse stress pattern. The brain seeks activation.',l:'Boredom in class signals that the brain is not being sufficiently challenged. Variety in methods and pace directly regulates activation levels.'},
+'Longing':{n:'The physical sensation of longing \u2014 a diffuse discomfort, a bodily pull \u2014 has hypothalamic components: the brain motivates the search for what is missed.',l:'Longing as a motivational state can be productive when directed toward achievable goals.'}
+},source:'Panksepp (1998); Bear et al. (2020); Eastwood et al. (2012); Kandel et al. (2021)'}},
+
+cortex:{de:{name:'Gro\u00dfhirnrinde',latin:'Cortex cerebri',
+desc:['Die Gro\u00dfhirnrinde ist die gefaltete \u00e4u\u00dfere Schicht des Gehirns. Die vielen Windungen sorgen daf\u00fcr, dass auf kleinem Raum sehr viel Hirnrinde untergebracht werden kann. Sie ist der Ort h\u00f6herer kognitiver Leistungen: Sprache, Denken, Planen, Bewusstsein.',
+'Sie ist in vier Hauptbereiche unterteilt: Frontallappen (Entscheidungen), Parietallappen (K\u00f6rpergef\u00fchl, Raum), Temporallappen (Sprache, Ged\u00e4chtnis) und Okzipitallappen (Sehen). Hier werden Emotionen bewertet, in Worte gefasst und in Bedeutung \u00fcbersetzt.'],
+learning:'Reflexion ist Kortex-Arbeit. Methoden, die Lernende zur Sprache bringen \u2014 Journaling, Peer-Gespr\u00e4che, Selbsteinsch\u00e4tzung \u2014 aktivieren kortikale Verarbeitung und helfen, Erfahrungen zu integrieren. Der Kortex h\u00e4ngt dabei von subcortikalen Strukturen ab: Ohne emotionale Bedeutung und Motivation bleibt Lernen oberfl\u00e4chlich.',
+emotions:{
+'Alle Emotionen':{n:'Der Kortex ist der \u00fcbergeordnete Bedeutungsrahmen: Hier werden Emotionen bewertet, in Worte gefasst und in sozialen und biografischen Kontext eingeordnet. Lisa Feldman Barrett (2017) geht in ihrer Theorie konstruierter Emotionen noch weiter: Emotionen sind keine festen Reaktionen einzelner Hirnregionen, sondern aktiv konstruierte Vorhersagen. Das Gehirn nutzt Erfahrungen, kulturelle Konzepte und K\u00f6rpersignale, um in jeder Situation neu zu entscheiden, welche Emotion passt. Die Gro\u00dfhirnrinde ist dabei untrennbar beteiligt: Ohne sprachliche Konzepte \u2014 das Wort \u201eScham\u201c, \u201eSehnsucht\u201c, \u201eNeugier\u201c \u2014 gibt es keine differenzierte Emotion.',l:'Reflexionsmethoden aktivieren den Kortex. Sie helfen, Erfahrungen zu integrieren und Emotionen in professionelles Handeln zu \u00fcberf\u00fchren. Barrett (2017) betont: Wer seinen emotionalen Wortschatz erweitert \u2014 also mehr Konzepte f\u00fcr innere Zust\u00e4nde hat \u2014 kann feiner differenzieren und Emotionen besser regulieren. Emotionale Bildung ist damit w\u00f6rtlich Sprachbildung.'},
+'Scham':{n:'Scham erfordert eine komplexe kognitive Leistung: sich selbst durch die Augen anderer zu sehen. Das ist Perspektiv\u00fcbernahme (Theory of Mind) \u2014 eine h\u00f6here kognitive Funktion des Kortex.',l:'\u201eWas genau hat dich besch\u00e4mt?\u201c schafft Distanz und erm\u00f6glicht Reflexion statt Vermeidung.'},
+'Staunen':{n:'Staunen erfordert die Erkenntnis, dass das eigene Wissensmodell nicht ausreicht \u2014 das ist Metakognition, also Nachdenken \u00fcber das eigene Denken.',l:'Staunen ist ein Einstieg in metakognitive Lernprozesse. \u201eWas wei\u00df ich, und was wei\u00df ich nicht?\u201c ist eine produktive Ausgangsfrage f\u00fcr tiefes Lernen.'},
+'Neugier':{n:'Neugier als epistemische Emotion ist im Kortex verankert: Sie richtet sich auf die L\u00fccke zwischen Gewusstem und Ungewusstem und erfordert Metakognition.',l:'Metakognitive Aufgaben \u2014 \u201eWas wei\u00dft du schon? Was willst du herausfinden?\u201c \u2014 aktivieren kortikale Neugierstrukturen und machen Lernziele bewusst.'}
+},source:'Kandel et al. (2021); Bear et al. (2020); Damasio (1999); Seth (2021)'},
+en:{name:'Cerebral Cortex',latin:'Cortex cerebri',
+desc:['The cerebral cortex is the folded outer layer of the brain. The many ridges allow a large amount of cortex to fit into a small space. It is the site of higher cognitive functions: language, thinking, planning, consciousness.',
+'It is divided into four main areas: frontal lobe (decisions), parietal lobe (body sense, space), temporal lobe (language, memory), and occipital lobe (vision). Here emotions are evaluated, put into words, and translated into meaning.'],
+learning:'Reflection is cortical work. Methods that bring learners to language \u2014 journaling, peer conversations, self-assessment \u2014 activate cortical processing and help integrate experiences. The cortex depends on subcortical structures: without emotional significance and motivation, learning remains superficial.',
+emotions:{
+'All emotions':{n:'The cortex is the overarching meaning framework: here emotions are evaluated, put into words, and placed in social and biographical context. Lisa Feldman Barrett\'s (2017) theory of constructed emotion goes further: emotions are not fixed responses of individual brain regions, but actively constructed predictions. The brain uses past experience, cultural concepts, and body signals to construct in each moment which emotion fits. The cerebral cortex is inseparably involved: without linguistic concepts \u2014 the word \u201cshame\u201d, \u201clonging\u201d, \u201ccuriosity\u201d \u2014 there is no differentiated emotion.',l:'Reflection methods activate the cortex. They help integrate experiences and translate emotions into professional action. Barrett (2017) emphasises that expanding emotional vocabulary \u2014 having more concepts for inner states \u2014 allows finer differentiation and better emotion regulation. Emotional education is therefore literally also language education.'},
+'Shame':{n:'Shame requires a complex cognitive achievement: seeing oneself through the eyes of others. This is perspective-taking (theory of mind) \u2014 a higher cognitive function of the cortex.',l:'\u201cWhat exactly shamed you?\u201d creates distance and enables reflection rather than avoidance.'},
+'Awe':{n:'Awe requires recognising that one\'s own knowledge model is insufficient \u2014 that is metacognition, thinking about one\'s own thinking.',l:'Awe is an entry point into metacognitive learning processes. \u201cWhat do I know, and what don\'t I know?\u201d is a productive starting question for deep learning.'},
+'Curiosity':{n:'Curiosity as an epistemic emotion is anchored in the cortex: it is directed at the gap between the known and the unknown and requires metacognition.',l:'Metacognitive tasks \u2014 \u201cWhat do you already know? What do you want to find out?\u201d \u2014 activate cortical curiosity structures and make learning goals conscious.'}
+},source:'Kandel et al. (2021); Bear et al. (2020); Damasio (1999); Seth (2021)'}},
+
+brainstem:{de:{name:'Hirnstamm',latin:'Truncus cerebri',
+desc:['Der Hirnstamm ist der evolution\u00e4r \u00e4lteste Teil des Gehirns. Er kontrolliert lebensnotwendige K\u00f6rperfunktionen: Atmung, Herzschlag, Blutdruck, Reflexe. Er ist die Verbindung zwischen Gehirn und R\u00fcckenmark.',
+'F\u00fcr Emotionen ist der Hirnstamm als Ursprungsort wichtiger Botenstoffe bedeutsam: Dopamin (Motivation, Belohnung), Serotonin (Stimmung) und Noradrenalin (Wachheit, Stress) werden hier produziert und wirken auf das gesamte Gehirn.'],
+learning:'Das allgemeine Aktivierungsniveau des Gehirns \u2014 wie wach und bereit jemand f\u00fcr Neues ist \u2014 wird ma\u00dfgeblich vom Hirnstamm mitgesteuert. Schlaf, Bewegung und Pausen regulieren ihn. Lernprozesse brauchen ein ausgewogenes Niveau: Zu wenig Aktivierung f\u00fchrt zu Langeweile, zu viel zu \u00dcberforderung.',
+emotions:{
+'Angst':{n:'Das periaquäduktale Grau im Mittelhirn koordiniert das Erstarren bei Bedrohung \u2014 eine der \u00e4ltesten \u00dcberlebensreaktionen. Es wird bei intensiver Angst aktiv, bevor Kortex und Amygdala vollst\u00e4ndig eingeschaltet haben.',l:'Sehr starke Angst kann das Erstarren ausl\u00f6sen: Teilnehmende, die \u201eblockieren\u201c, erleben m\u00f6glicherweise genau diese Reaktion. Das ist keine Faulheit oder Gleichg\u00fcltigkeit.'},
+'Langeweile':{n:'Das Aktivierungssystem des Hirnstamms reguliert den Wachheitszustand. Langeweile entsteht, wenn das Gehirn zu wenig Stimulation erh\u00e4lt \u2014 das System arbeitet unter seinem optimalen Niveau.',l:'Abwechslung in Methoden und Sozialformen reguliert das Aktivierungsniveau des Hirnstamms direkt \u2014 nicht nur eine didaktische, sondern auch eine neurobiologische Entscheidung.'},
+'Liebe':{n:'Das ventrale tegmentale Areal (VTA) im Hirnstamm ist der Ursprung des Dopaminsystems. Bei sozialer Bindung und Zuneigung sch\u00fcttet das VTA Dopamin aus.',l:'Pers\u00f6nliche, wertsch\u00e4tzende Beziehungen zwischen Lehrenden und Lernenden haben neurobiologische Lernergebnisse \u2014 \u00fcber das Dopaminsystem.'},
+'Freude':{n:'Freude hat neurochemische Wurzeln im Hirnstamm: Serotonin, Dopamin und Noradrenalin beeinflussen gemeinsam Grundstimmung und Reagibilit\u00e4t.',l:'K\u00f6rperliche Aktivit\u00e4t, Schlaf und soziale Verbundenheit st\u00e4rken die Lernf\u00e4higkeit, weil sie die Botenstoffsysteme des Hirnstamms regulieren.'},
+'Trauer':{n:'Anhaltende Trauer ver\u00e4ndert die Serotoninverf\u00fcgbarkeit, die im Hirnstamm reguliert wird. Das erkl\u00e4rt die k\u00f6rperliche Ersch\u00f6pfung, die mit tiefer Trauer verbunden ist.',l:'Lernende in Trauer ben\u00f6tigen andere Rahmenbedingungen. Die k\u00f6rperliche Dimension von Trauer anzuerkennen geh\u00f6rt zur professionellen Haltung in der Erwachsenenbildung.'}
+},source:'Panksepp (1998); Bear et al. (2020); Damasio (1999)'},
+en:{name:'Brainstem',latin:'Truncus cerebri',
+desc:['The brainstem is the evolutionarily oldest part of the brain. It controls vital bodily functions: breathing, heartbeat, blood pressure, reflexes. It is the connection between brain and spinal cord.',
+'For emotions, the brainstem is significant as the origin of key neurotransmitters: dopamine (motivation, reward), serotonin (mood), and noradrenaline (alertness, stress) are produced here and act on the entire brain.'],
+learning:'The general activation level of the brain \u2014 how awake and ready for new things someone is \u2014 is substantially regulated by the brainstem. Sleep, movement, and breaks regulate it. Learning needs a balanced level: too little activation leads to boredom, too much to overwhelm.',
+emotions:{
+'Fear':{n:'The periaqueductal grey in the midbrain coordinates freezing in response to threat \u2014 one of the oldest survival responses. It activates during intense fear before the cortex and amygdala have fully engaged.',l:'Very intense fear can trigger freezing: participants who \u201cblock\u201d may be experiencing exactly this response. This is not laziness or indifference.'},
+'Boredom':{n:'The brainstem\'s activation system regulates the wakefulness state. Boredom arises when the brain receives too little stimulation \u2014 the system works below its optimal level.',l:'Variety in methods and social forms directly regulates the brainstem\'s activation level \u2014 not just a didactic choice, but a neurobiological one.'},
+'Love':{n:'The ventral tegmental area (VTA) in the brainstem is the origin of the dopamine system. During social bonding and affection, the VTA releases dopamine.',l:'Personal, appreciative relationships between educators and learners have neurobiological learning outcomes \u2014 via the dopamine system.'},
+'Joy':{n:'Joy has neurochemical roots in the brainstem: serotonin, dopamine, and noradrenaline together influence basic mood and responsiveness.',l:'Physical activity, sleep, and social connectedness strengthen learning capacity by regulating the brainstem\'s neurotransmitter systems.'},
+'Grief':{n:'Sustained grief alters serotonin availability, regulated in the brainstem. This explains the physical exhaustion associated with deep grief.',l:'Learners in grief need different conditions. Acknowledging the physical dimension of grief belongs to the professional stance in adult education.'}
+},source:'Panksepp (1998); Bear et al. (2020); Damasio (1999)'}}
+};
+
+var N={
+de:[
+{id:'reward',icon:'&#9889;',color:'#e67e22',
+title:'Das Belohnungssystem',
+sub:'Wie Motivation und Lernen neurobiologisch zusammenh\u00e4ngen',
+steps:[
+{l:'Ventrale tegmentale Area (VTA) im Hirnstamm',t:'Wenn das Gehirn etwas als bedeutsam oder potenziell belohnend bewertet, sch\u00fcttet das VTA <strong>Dopamin</strong> aus. Das passiert nicht nur bei tats\u00e4chlicher Belohnung \u2014 schon die <em>Erwartung</em> einer Belohnung gen\u00fcgt.'},
+{l:'Nucleus Accumbens',t:'Dopamin erreicht den Nucleus accumbens. Hier entsteht das Gef\u00fchl von <strong>Verlangen und Motivation</strong>. Berridge & Robinson (1998) nannten das \u201eWollen\u201c: das Verlangen, bevor man etwas hat. <em>Das Wollen motiviert mehr als das Bekommen.</em>'},
+{l:'Pr\u00e4frontaler Kortex',t:'Der pr\u00e4frontale Kortex gibt die Richtung vor: <strong>Was lohnt sich?</strong> Er bewertet Ziele, plant Schritte, filtert Ablenkungen. Ohne ihn w\u00e4re das Belohnungssystem ziellos.'},
+{l:'Amygdala',t:'Die Amygdala markiert, ob etwas <strong>emotional bedeutsam</strong> ist. Nicht Dopamin allein, sondern die emotionale Bedeutung entscheidet, was als belohnend erlebt wird.'},
+{l:'Hippocampus',t:'Wenn Belohnung eintrifft, hilft der Hippocampus, das Erlebnis <strong>im Ged\u00e4chtnis zu verankern</strong>. Wiederholte positive Erfahrungen hinterlassen tiefe Spuren.'}
+],
+learning:'Lernen aktiviert das Belohnungssystem, wenn es mit Kompetenzerleben, Neugier, sozialer Anerkennung oder pers\u00f6nlicher Bedeutsamkeit verbunden ist. Externe Belohnungen wie Noten oder Druck aktivieren dieses System kaum \u2014 intrinsische Motivation ist neurobiologisch wirksamer.',
+emotions:['Freude','Neugier','Stolz','Liebe']},
+{id:'threat',icon:'&#128308;',color:'#c0392b',
+title:'Die Stressreaktion',
+sub:'Was im Gehirn passiert, wenn wir uns bedroht f\u00fchlen',
+steps:[
+{l:'Sinneseindr\u00fccke \u2192 Thalamus',t:'Ein bedrohlicher Reiz \u2014 Blick, Ton, Situation \u2014 wird vom Thalamus empfangen und <strong>auf zwei Wegen gleichzeitig</strong> weitergeleitet.'},
+{l:'Schneller Weg: Thalamus \u2192 Amygdala',t:'Innerhalb von Millisekunden erreicht ein grobes Signal die Amygdala. Sie entscheidet: <strong>Gefahr?</strong> Noch bevor der Kortex analysiert hat. LeDoux (1996) nannte das die \u201eLow Road\u201c. <em>Schnell, aber ungenau.</em>'},
+{l:'Amygdala \u2192 Hypothalamus',t:'Die Amygdala aktiviert den Hypothalamus. Dieser setzt die <strong>Stressachse</strong> in Gang: Cortisol und Adrenalin werden ausgesch\u00fcttet. Herzschlag steigt, Muskeln spannen sich an.'},
+{l:'Langsamer Weg: Thalamus \u2192 Kortex \u2192 Amygdala',t:'Parallel analysiert der Kortex die Situation pr\u00e4ziser: <strong>Ist das wirklich gef\u00e4hrlich?</strong> Das dauert l\u00e4nger \u2014 erm\u00f6glicht aber Korrektur und Beruhigung.'},
+{l:'Folgen f\u00fcr Ged\u00e4chtnis und Lernen',t:'Kurzfristiger Stress kann Aufmerksamkeit sch\u00e4rfen. Chronischer Stress sch\u00e4digt den Hippocampus: <strong>Ged\u00e4chtnisbildung leidet</strong>, Denken verengt sich auf Bedrohungsabwehr.'}
+],
+learning:'Stressige Lernumgebungen aktivieren die Stressreaktion dauerhaft. Das verringert hippocampale Ged\u00e4chtnisleistung, verengt das Denken und macht Lernen fehleranf\u00e4lliger. Psychologische Sicherheit im Kursraum ist neurobiologisch begr\u00fcndet.',
+emotions:['Angst','\u00c4rger','Scham']},
+{id:'social',icon:'&#129309;',color:'#7d3c98',
+title:'Das soziale Gehirn',
+sub:'Wie soziale Erfahrungen das Lernen pr\u00e4gen',
+steps:[
+{l:'Insula \u2014 K\u00f6rper und Empathie',t:'Die Insula vermittelt k\u00f6rperliche Empfindungen ins Bewusstsein. Wenn wir mitf\u00fchlen, aktiviert sich die Insula \u2014 <strong>Empathie ist k\u00f6rperlich</strong>.'},
+{l:'Anteriores Cingulum \u2014 sozialer Schmerz',t:'Ausgrenzung, Ablehnung oder Nicht-Dazugeh\u00f6ren aktivieren das anteriore Cingulum \u00e4hnlich wie <strong>k\u00f6rperlicher Schmerz</strong>. Soziale Isolation tut neurobiologisch weh (Eisenberger et al., 2003).'},
+{l:'Amygdala \u2014 soziale Bedrohung',t:'Soziale Bedrohung \u2014 Kritik, Blamage, Nicht-Verstehen \u2014 aktiviert die Amygdala. Der K\u00f6rper reagiert wie auf physische Gefahr: <strong>R\u00fcckzug, Abwehr oder Erstarren</strong>.'},
+{l:'Hypothalamus \u2014 Oxytocin und Bindung',t:'Bei sozialer W\u00e4rme und Vertrauen sch\u00fcttet der Hypothalamus <strong>Oxytocin</strong> aus. Das Bindungshormon erh\u00f6ht Vertrauen und reduziert soziale Angst.'},
+{l:'Nucleus Accumbens \u2014 Zugeh\u00f6rigkeit als Belohnung',t:'Dazugeh\u00f6ren aktiviert das Belohnungssystem. <strong>Soziale Anerkennung und Zugeh\u00f6rigkeit sind f\u00fcr das Gehirn Belohnungsreize</strong> \u2014 \u00e4hnlich wie Nahrung oder Erfolg.'}
+],
+learning:'Das Gehirn ist ein soziales Organ. Lernprozesse gelingen besser in Gruppen mit Vertrauen, Zugeh\u00f6rigkeitsgef\u00fchl und psychologischer Sicherheit. Soziale Ausgrenzung oder Scham im Kursraum haben direkte neurobiologische Folgen f\u00fcr die Lernf\u00e4higkeit.',
+emotions:['Scham','Neid','Liebe','Trauer','Stolz']},
+{id:'memory',icon:'&#129513;',color:'#2471a3',
+title:'Ged\u00e4chtnis und Emotion',
+sub:'Warum emotional bedeutsame Momente besser behalten werden',
+steps:[
+{l:'Amygdala \u2014 emotionale Markierung',t:'Die Amygdala bewertet eingehende Erfahrungen: <strong>Wie bedeutsam ist das?</strong> Je emotionaler ein Moment, desto st\u00e4rker ist das Signal, das zur Ged\u00e4chtniskonsolidierung gesendet wird.'},
+{l:'Hippocampus \u2014 Konsolidierung',t:'Der Hippocampus ist die Ged\u00e4chtnisentrale. Er verkn\u00fcpft Inhalte mit Kontext (wo? wann? wie?) und \u00fcbertr\u00e4gt Erfahrungen ins Langzeitged\u00e4chtnis \u2014 besonders stark, wenn die Amygdala ein emotionales Signal gesendet hat.'},
+{l:'Nucleus Accumbens \u2014 Neugier st\u00e4rkt Ged\u00e4chtnis',t:'Gruber et al. (2014): In Zust\u00e4nden hoher Neugier ist der Hippocampus besonders aktiv. <strong>Neugier verbessert nicht nur das Behalten des Interessensgegenstands</strong>, sondern auch zuf\u00e4llig pr\u00e4senter Informationen.'},
+{l:'Schlaf \u2014 n\u00e4chtliche Konsolidierung',t:'Im Schlaf \u00fcbertr\u00e4gt der Hippocampus Tageserfahrungen in kortikale Langzeitspeicher. <strong>Ohne Schlaf kein stabiles Ged\u00e4chtnis</strong> \u2014 besonders f\u00fcr neues, konzeptuelles Wissen.'}
+],
+learning:'Pers\u00f6nliche Relevanz, emotionale Beteiligung und Neugier verbessern das Behalten messbar. Das sind neurobiologische Befunde. Didaktische Formate, die Emotionen einbeziehen, sind deshalb nicht weicher \u2014 sie sind effektiver.',
+emotions:['Neugier','Freude','Angst','Sehnsucht','Staunen']}
+],
+en:[
+{id:'reward',icon:'&#9889;',color:'#e67e22',
+title:'The Reward System',
+sub:'How motivation and learning are neurobiologically connected',
+steps:[
+{l:'Ventral Tegmental Area (VTA) in the brainstem',t:'When the brain evaluates something as significant or potentially rewarding, the VTA releases <strong>dopamine</strong>. This happens not just with actual reward \u2014 the <em>expectation</em> of reward is sufficient.'},
+{l:'Nucleus Accumbens',t:'Dopamine reaches the nucleus accumbens. Here the feeling of <strong>desire and motivation</strong> arises. Berridge & Robinson (1998) called this \u201cwanting\u201d: the wanting before one has something. <em>Wanting motivates more than getting.</em>'},
+{l:'Prefrontal Cortex',t:'The prefrontal cortex provides direction: <strong>What is worth it?</strong> It evaluates goals, plans steps, filters distractions. Without it, the reward system would be directionless.'},
+{l:'Amygdala',t:'The amygdala marks whether something is <strong>emotionally significant</strong>. Not dopamine alone, but emotional significance decides what is experienced as rewarding.'},
+{l:'Hippocampus',t:'When reward arrives, the hippocampus helps to <strong>anchor the experience in memory</strong>. Repeated positive experiences leave deep traces.'}
+],
+learning:'Learning activates the reward system when associated with experiences of competence, curiosity, social recognition, or personal significance. External rewards like grades or pressure barely activate this system \u2014 intrinsic motivation is neurobiologically more effective.',
+emotions:['Joy','Curiosity','Pride','Love']},
+{id:'threat',icon:'&#128308;',color:'#c0392b',
+title:'The Stress Response',
+sub:'What happens in the brain when we feel threatened',
+steps:[
+{l:'Sensory input \u2192 Thalamus',t:'A threatening stimulus \u2014 glance, sound, situation \u2014 is received by the thalamus and relayed <strong>via two pathways simultaneously</strong>.'},
+{l:'Fast pathway: Thalamus \u2192 Amygdala',t:'Within milliseconds, a rough signal reaches the amygdala. It decides: <strong>Danger?</strong> Before the cortex has analysed anything. LeDoux (1996) called this the \u201clow road\u201d. <em>Fast, but imprecise.</em>'},
+{l:'Amygdala \u2192 Hypothalamus',t:'The amygdala activates the hypothalamus. This sets the <strong>stress axis</strong> in motion: cortisol and adrenaline are released. Heart rate rises, muscles tense.'},
+{l:'Slow pathway: Thalamus \u2192 Cortex \u2192 Amygdala',t:'In parallel, the cortex analyses the situation more precisely: <strong>Is this really dangerous?</strong> This takes longer \u2014 but enables correction and calming.'},
+{l:'Consequences for memory and learning',t:'Brief stress can sharpen attention. Chronic stress damages the hippocampus: <strong>memory formation suffers</strong>, thinking narrows to threat defence.'}
+],
+learning:'Stressful learning environments keep the stress response permanently active. This reduces hippocampal memory performance, narrows thinking, and makes learning more error-prone. Psychological safety in the classroom is neurobiologically justified.',
+emotions:['Fear','Anger','Shame']},
+{id:'social',icon:'&#129309;',color:'#7d3c98',
+title:'The Social Brain',
+sub:'How social experiences shape learning',
+steps:[
+{l:'Insula \u2014 body and empathy',t:'The insula conveys bodily sensations to consciousness. When we feel with others, the insula activates \u2014 <strong>empathy is physical</strong>.'},
+{l:'Anterior cingulate \u2014 social pain',t:'Exclusion, rejection, or not belonging activates the anterior cingulate similarly to <strong>physical pain</strong>. Social isolation neurobiologically hurts (Eisenberger et al., 2003).'},
+{l:'Amygdala \u2014 social threat',t:'Social threat \u2014 criticism, embarrassment, not understanding \u2014 activates the amygdala. The body responds as to physical danger: <strong>withdrawal, defence, or freezing</strong>.'},
+{l:'Hypothalamus \u2014 oxytocin and bonding',t:'During social warmth and trust, the hypothalamus releases <strong>oxytocin</strong>. The bonding hormone increases trust and reduces social anxiety.'},
+{l:'Nucleus Accumbens \u2014 belonging as reward',t:'Belonging activates the reward system. <strong>Social recognition and belonging are reward stimuli for the brain</strong> \u2014 similar to food or success.'}
+],
+learning:'The brain is a social organ. Learning processes work better in groups with trust, a sense of belonging, and psychological safety. Social exclusion or shame in the classroom have direct neurobiological consequences for learning capacity.',
+emotions:['Shame','Envy','Love','Grief','Pride']},
+{id:'memory',icon:'&#129513;',color:'#2471a3',
+title:'Memory and Emotion',
+sub:'Why emotionally significant moments are better retained',
+steps:[
+{l:'Amygdala \u2014 emotional marking',t:'The amygdala evaluates incoming experiences: <strong>How significant is this?</strong> The more emotional a moment, the stronger the signal sent for memory consolidation.'},
+{l:'Hippocampus \u2014 consolidation',t:'The hippocampus is the memory centre. It connects content with context (where? when? how?) and transfers experiences to long-term memory \u2014 especially strongly when the amygdala has sent an emotional signal.'},
+{l:'Nucleus Accumbens \u2014 curiosity strengthens memory',t:'Gruber et al. (2014): in states of high curiosity, the hippocampus is particularly active. <strong>Curiosity improves not only retention of the topic of interest</strong> but also incidentally present information.'},
+{l:'Sleep \u2014 nocturnal consolidation',t:'During sleep, the hippocampus transfers daily experiences to cortical long-term stores. <strong>Without sleep, no stable memory</strong> \u2014 especially for new, conceptual knowledge.'}
+],
+learning:'Personal relevance, emotional involvement, and curiosity measurably improve retention. These are neurobiological findings. Didactic formats that incorporate emotions are therefore not softer \u2014 they are more effective.',
+emotions:['Curiosity','Joy','Fear','Longing','Awe']}
+]};
+
+var I18N={
+  de:{
+    'header-title':'Gehirn &amp; Emotionen',
+    'tab-structures':'Strukturen',
+    'tab-networks':'Netzwerke',
+    'click-hint':'Klicke auf eine Hirnstruktur',
+    'select-structure':'Gehirnstruktur auswählen',
+    'select-hint':'Klicke auf eine farbige Region oder auf einen Begriff in der Legende.',
+    'brainstem':'Hirnstamm',
+    'pfc-line1':'Präfrontaler',
+    'pfc-line2':'Kortex',
+    'frontal':'Frontallappen',
+    'parietal':'Parietallappen',
+    'temporal':'Temporallappen',
+    'occipital-1':'Okzipital-',
+    'occipital-2':'lappen',
+    'schema-note':'Schematische Medialansicht · linke Hemisphäre'
+  },
+  en:{
+    'header-title':'Brain &amp; Emotions',
+    'tab-structures':'Structures',
+    'tab-networks':'Networks',
+    'click-hint':'Click on a brain structure',
+    'select-structure':'Select a brain structure',
+    'select-hint':'Click on a coloured region or on a term in the legend.',
+    'brainstem':'Brainstem',
+    'pfc-line1':'Prefrontal',
+    'pfc-line2':'Cortex',
+    'frontal':'Frontal lobe',
+    'parietal':'Parietal lobe',
+    'temporal':'Temporal lobe',
+    'occipital-1':'Occipital',
+    'occipital-2':'lobe',
+    'schema-note':'Schematic medial view · left hemisphere'
+  }
+};
+function applyI18n(l){
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    var key=el.getAttribute('data-i18n');
+    if(I18N[l]&&I18N[l][key]!==undefined){el.innerHTML=I18N[l][key];}
+  });
+}
+function setLang(l){lang=l;document.getElementById('ld').classList.toggle('on',l=='de');document.getElementById('le').classList.toggle('on',l=='en');applyI18n(l);selEm=null;renderLeg();if(view=='n')renderNet();if(selId)renderSB(selId);else renderEmpty();}
+function setView(v){view=v;document.getElementById('bv').classList.toggle('on',v=='b');document.getElementById('nv').classList.toggle('on',v=='n');document.getElementById('tb1').classList.toggle('on',v=='b');document.getElementById('tb2').classList.toggle('on',v=='n');if(v=='n'){renderNet();renderEmpty();}}
+function renderLeg(){var c=document.getElementById('leg');c.innerHTML='';Object.keys(S).forEach(function(id){var s=S[id][lang];var el=document.createElement('div');el.className='li'+(selId==id?' on':'');el.innerHTML='<div class="ldot" style="background:'+C[id]+'"></div><span>'+s.name+'</span>';el.onclick=function(){selStr(id)};c.appendChild(el);});}
+function selStr(id){selId=id;selEm=null;document.querySelectorAll('.br').forEach(function(el){var r=el.dataset.id;el.classList.toggle('hi',r==id);el.classList.toggle('dim',!!r&&r!=id);});document.getElementById('cb').style.background=C[id];document.getElementById('bh').textContent=S[id][lang].name;renderSB(id);renderLeg();}
+function renderSB(id){var s=S[id][lang];var tags=Object.keys(s.emotions).map(function(e){return '<span class="etag" style="color:'+C[id]+';border-color:'+C[id]+'30;background:'+C[id]+'0f" onclick="selEmo(\''+id+'\',\''+e.replace(/'/g,"\\'")+'\')">' +e+'</span>';}).join('');var det='';if(selEm&&s.emotions[selEm]){var em=s.emotions[selEm];det='<div class="edet"><div class="edh"><div class="edot" style="background:'+C[id]+'"></div>'+selEm+'</div><p>'+em.n+'</p><div class="elb"><strong>'+(lang=='de'?'Im Lernkontext':'In the learning context')+'</strong>'+em.l+'</div><div class="src">'+s.source+'</div></div>';}else{det='<div class="empty" style="flex:1"><span style="font-size:.73rem;color:var(--muted)">'+(lang=='de'?'W\u00e4hle eine Emotion f\u00fcr die spezifische Verbindung zu dieser Struktur.':'Select an emotion to see its specific connection to this structure.')+'</span></div>';}
+var lb=s.learning?'<div class="lnote"><strong>'+(lang=='de'?'Bedeutung f\u00fcr das Lernen':'Significance for learning')+'</strong>'+s.learning+'</div>':'';
+document.getElementById('sc').innerHTML='<div class="atop"><h2>'+s.name+'</h2><div class="lat">'+s.latin+'</div></div><div class="sdesc">'+s.desc.map(function(p){return '<p>'+p+'</p>';}).join('')+'</div>'+lb+'<div class="esec"><div class="eslbl">'+(lang=='de'?'Emotionen in EMO.learn':'Emotions in EMO.learn')+'</div><div class="etags">'+tags+'</div></div>'+det;}
+function selEmo(sid,em){selEm=em;renderSB(sid);}
+function renderEmpty(){document.getElementById('cb').style.background='var(--border)';document.getElementById('sc').innerHTML='<div class="empty"><strong>'+(lang=='de'?'Struktur oder Netzwerk ausw\u00e4hlen':'Select a structure or network')+'</strong><span>'+(lang=='de'?'Klicke links auf eine Hirnstruktur oder wechsle zur Netzwerk-Ansicht.':'Click on a brain structure on the left, or switch to the network view.')+'</span></div>';}
+function renderNet(){var nets=N[lang];var inner=document.getElementById('ni');inner.innerHTML='<div class="ntit">'+(lang=='de'?'Neuronale Netzwerke & Emotionen':'Neural Networks & Emotions')+'</div><div class="nsub">'+(lang=='de'?'Emotionen entstehen nicht in einzelnen Hirnstrukturen, sondern in Netzwerken, die mehrere Regionen zusammenschalten. Lisa Feldman Barrett (2017) geht noch einen Schritt weiter: Das Gehirn konstruiert Emotionen aktiv \u2014 auf Basis von Vorhersagen, K\u00f6rpersignalen und erlernten Konzepten. Die folgenden Netzwerke zeigen, wie diese Konstruktion abl\u00e4uft. Klicke auf ein Netzwerk, um den Ablauf zu erkunden.':'Emotions do not arise in individual brain structures, but in networks that connect multiple regions. Lisa Feldman Barrett (2017) goes further: the brain actively constructs emotions \u2014 based on predictions, body signals, and learned concepts. The networks below show how this construction unfolds. Click on a network to explore how it works.')+'</div>'+nets.map(function(n){return '<div class="nc" id="nc-'+n.id+'" onclick="togNet(\''+n.id+'\')">'+'<div class="nch"><div class="nico" style="background:'+n.color+'20">'+n.icon+'</div>'+'<div><div class="ntt" style="color:'+n.color+'">'+n.title+'</div><div class="nts">'+n.sub+'</div></div>'+'<div class="nchev">\u25bc</div></div>'+'<div class="ncb">'+'<div class="nflow">'+n.steps.map(function(s,i){return '<div class="fstep"><div class="fnum" style="background:'+n.color+'">'+(i+1)+'</div><div class="ftxt"><strong>'+s.l+'</strong><br>'+s.t+'</div></div>'+(i<n.steps.length-1?'<div class="fstep"><div class="fcon"></div><div></div></div>':'');}).join('')+'</div>'+'<div class="nlb"><strong>'+(lang=='de'?'P\u00e4dagogische Relevanz':'Pedagogical relevance')+'</strong>'+n.learning+'</div></div></div>';}).join('');}
+function togNet(id){var c=document.getElementById('nc-'+id);c.classList.toggle('ex');}
+document.querySelectorAll('.br').forEach(function(el){el.addEventListener('click',function(){var id=el.dataset.id;if(id&&S[id])selStr(id);});});
+renderLeg();renderEmpty();applyI18n(lang);
+</script></body></html>
